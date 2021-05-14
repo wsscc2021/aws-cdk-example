@@ -25,9 +25,9 @@ class EksStack(core.Stack):
         self.create_kms()
         self.create_iam()
         self.create_eks_cluster()
-        self.create_oidc()
         self.create_launch_template()
         self.create_nodegroup()
+        self.create_service_account()
 
     def create_kms(self):
         # KMS CMK for EKS
@@ -117,12 +117,6 @@ class EksStack(core.Stack):
                 aws_ec2.SubnetSelection(subnets=[subnet for subnet in self.vpc.private_subnets])
             ])
 
-    def create_oidc(self):
-        # OpenID Provider
-        self.oidc = aws_iam.OpenIdConnectProvider(self, "oidc",
-            url=self.eks_cluster.cluster_open_id_connect_issuer_url,
-            client_ids=[f"{self.project['prefix']}-eks-cluster"])
-
     def create_launch_template(self):
         self.launch_template = dict()
         self.launch_template['core'] = aws_ec2.LaunchTemplate(self, "lt-nodegroup-core",
@@ -169,6 +163,56 @@ class EksStack(core.Stack):
             subnets=aws_ec2.SubnetSelection(
                 subnet_type=aws_ec2.SubnetType.PRIVATE
             ))
+
+    def create_service_account(self):
+        self.service_account = dict()
+        self.add_service_account(
+            name        = "aws-load-balancer-controller",
+            namespace   = "kube-system",
+            policy_file = "eks/policy/aws-load-balancer-controller.json")
+        self.add_service_account(
+            name        = "cluster-autoscaler",
+            namespace   = "kube-system",
+            policy_file = "eks/policy/cluster-autoscaler.json")
+        self.add_service_account(
+            name        = "external-dns",
+            namespace   = "kube-system",
+            policy_file = "eks/policy/external-dns.json")
+        self.add_service_account(
+            name        = "aws-cloudwatch-metrics",
+            namespace   = "kube-system",
+            managed_policies = [
+                aws_iam.ManagedPolicy.from_aws_managed_policy_name("CloudWatchAgentServerPolicy")
+            ])
+        self.add_service_account(
+            name        = "appmesh-controller",
+            namespace   = "kube-system",
+            managed_policies = [
+                aws_iam.ManagedPolicy.from_aws_managed_policy_name("AWSAppMeshFullAccess"),
+                aws_iam.ManagedPolicy.from_aws_managed_policy_name("AWSCloudMapFullAccess")
+            ])
+        self.add_service_account(
+            name        = "appmesh-application",
+            namespace   = "kube-system",
+            managed_policies = [
+                aws_iam.ManagedPolicy.from_aws_managed_policy_name("AWSAppMeshEnvoyAccess"),
+                aws_iam.ManagedPolicy.from_aws_managed_policy_name("AWSXrayWriteOnlyAccess")
+            ])
+
+    def add_service_account(self, name, namespace, policy_file=None, managed_policies=[]):
+        self.service_account[name] = aws_eks.ServiceAccount(
+            self, f"sa-{name}",
+            cluster=self.eks_cluster,
+            name=name,
+            namespace=namespace)
+        if policy_file:
+            with open(policy_file) as json_file:
+                json_data = json.load(json_file)
+            for statement in json_data['Statement']:
+                self.service_account[name].add_to_principal_policy(
+                    aws_iam.PolicyStatement.from_json(statement))
+        for policy in managed_policies:
+            self.service_account[name].role.add_managed_policy(policy)
 
     def create_security_group(self):
          # Security Group
