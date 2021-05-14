@@ -13,6 +13,7 @@ from aws_cdk import core
 from vpc.vpc_stack import VpcStack
 from security.kms.kms_stack import KmsStack
 from security.iam.iam_stack import IamStack
+from security.security_group.security_group_stack import SecurityGroupStack
 
 # Information of project
 project = dict()
@@ -46,6 +47,13 @@ kms_stack = KmsStack(
     scope        = app,
     construct_id = f"{project['prefix']}-kms",
     project      = project,
+    env          = cdk_environment)
+
+security_group_stack = SecurityGroupStack(
+    scope        = app,
+    construct_id = f"{project['prefix']}-security-group",
+    project      = project,
+    vpc          = vpc_stack.vpc,
     env          = cdk_environment)
 
 # app synth -> cloudformation template
