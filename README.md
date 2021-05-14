@@ -1,4 +1,7 @@
 
+## version infomation
+aws-cdk@1.100.0
+
 ## services directory
 services 디렉터리 안에 각 서비스 단위의 example 파일들이 위치해 있습니다.  
 해당 example 파일들은 서로 종속성을 가지고 있지 않습니다.
