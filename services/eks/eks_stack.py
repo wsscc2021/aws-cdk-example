@@ -28,6 +28,7 @@ class EksStack(core.Stack):
         self.create_launch_template()
         self.create_nodegroup()
         self.create_service_account()
+        self.install_helm_chart()
 
     def create_kms(self):
         # KMS CMK for EKS
@@ -213,6 +214,104 @@ class EksStack(core.Stack):
                     aws_iam.PolicyStatement.from_json(statement))
         for policy in managed_policies:
             self.service_account[name].role.add_managed_policy(policy)
+
+    def install_helm_chart(self):
+        self.eks_cluster.add_helm_chart(
+            "helm-aws-load-balancer-controller",
+            repository="https://aws.github.io/eks-charts",
+            chart="aws-load-balancer-controller",
+            release="aws-load-balancer-controller",
+            version=None, 
+            create_namespace=None,
+            namespace="kube-system",
+            values={
+                'serviceAccount': {
+                    'create': False,
+                    'name': 'aws-load-balancer-controller'
+                },
+                'clusterName': self.eks_cluster.cluster_name
+            },
+            timeout=None,
+            wait=None)
+
+        self.eks_cluster.add_helm_chart(
+            "helm-cluster-autoscaler",
+            repository="https://kubernetes.github.io/autoscaler",
+            chart="cluster-autoscaler",
+            release="aws-cluster-autoscaler",
+            version=None, 
+            create_namespace=None,
+            namespace="kube-system",
+            values={
+                'autoDiscovery': {
+                    'clusterName': self.eks_cluster.cluster_name,
+                },
+                'awsRegion': self.project['region'],
+                'rbac': {
+                    'serviceAccount': {
+                        'create': False,
+                        'name': 'cluster-autoscaler'
+                    }
+                }
+            },
+            timeout=None,
+            wait=None)
+        
+        self.eks_cluster.add_helm_chart(
+            "helm-external-dns",
+            repository="https://charts.bitnami.com/bitnami",
+            chart="external-dns",
+            release="external-dns",
+            version=None, 
+            create_namespace=None,
+            namespace="kube-system",
+            values={
+                'serviceAccount': {
+                    'create': False,
+                    'name': 'external-dns'
+                }
+            },
+            timeout=None,
+            wait=None)
+
+        self.eks_cluster.add_helm_chart(
+            "helm-aws-cloudwatch-metrics",
+            repository="https://aws.github.io/eks-charts",
+            chart="aws-cloudwatch-metrics",
+            release="aws-cloudwatch-metrics",
+            version=None, 
+            create_namespace=None,
+            namespace="kube-system",
+            values={
+                'clusterName': self.eks_cluster.cluster_name,
+                'serviceAccount': {
+                    'create': False,
+                    'name': 'aws-cloudwatch-metrics'
+                }
+            },
+            timeout=None,
+            wait=None)
+        
+        self.eks_cluster.add_helm_chart(
+            "helm-appmesh-controller",
+            repository="https://aws.github.io/eks-charts",
+            chart="appmesh-controller",
+            release="appmesh-controller",
+            version=None, 
+            create_namespace=None,
+            namespace="kube-system",
+            values={
+                'serviceAccount': {
+                    'create': False,
+                    'name': 'appmesh-controller'
+                },
+                'tracing': {
+                    'enabled': True,
+                    'provider': 'x-ray'
+                }
+            },
+            timeout=None,
+            wait=None)
 
     def create_security_group(self):
          # Security Group
