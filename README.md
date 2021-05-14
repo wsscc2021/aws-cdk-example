@@ -12,7 +12,7 @@ solutions 디렉터리 안에는 각 서비스를 조합한 하나의 solutions�
 mkdir new-project
 
 git clone https://github.com/wsscc2021/aws-cdk-example.git
-cp -r aws-cdk-example/* new-project
+cp -r aws-cdk-example/solutions/basis/* new-project
 ```
 
 /services 디렉터리 내의 example파일들을 참조하여 과제에 맞는 cdk 추가 작성
