@@ -11,6 +11,7 @@ from aws_cdk import core
 
 # Import Services modules
 from vpc.vpc_stack import VpcStack
+from kms.kms_stack import KmsStack
 
 # Information of project
 project = dict()
@@ -32,6 +33,12 @@ app = core.App()
 vpc_stack = VpcStack(
     scope        = app,
     construct_id = f"{project['prefix']}",
+    project      = project,
+    env          = cdk_environment)
+
+kms_stack = KmsStack(
+    scope        = app,
+    construct_id = f"{project['prefix']}-kms",
     project      = project,
     env          = cdk_environment)
 
