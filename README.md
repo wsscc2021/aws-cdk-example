@@ -13,7 +13,7 @@ mkdir new-project
 
 git clone https://github.com/wsscc2021/aws-cdk-example.git
 cp -r aws-cdk-example/* new-project
-``
+```
 
 /services 디렉터리 내의 example파일들을 참조하여 과제에 맞는 cdk 추가 작성
 ```
