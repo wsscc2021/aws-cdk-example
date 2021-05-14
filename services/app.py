@@ -11,8 +11,8 @@ from aws_cdk import core
 
 # Import Services modules
 from vpc.vpc_stack import VpcStack
-from kms.kms_stack import KmsStack
-from iam.iam_stack import IamStack
+from security.kms.kms_stack import KmsStack
+from security.iam.iam_stack import IamStack
 
 # Information of project
 project = dict()
