@@ -12,6 +12,7 @@ from aws_cdk import core
 # Import Services modules
 from vpc.vpc_stack import VpcStack
 from kms.kms_stack import KmsStack
+from iam.iam_stack import IamStack
 
 # Information of project
 project = dict()
@@ -29,10 +30,15 @@ cdk_environment = core.Environment(
 # cdk construct
 app = core.App()
 
-# VPC
 vpc_stack = VpcStack(
     scope        = app,
     construct_id = f"{project['prefix']}",
+    project      = project,
+    env          = cdk_environment)
+
+iam_stack = IamStack(
+    scope        = app,
+    construct_id = f"{project['prefix']}-iam",
     project      = project,
     env          = cdk_environment)
 
