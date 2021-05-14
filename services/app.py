@@ -14,6 +14,7 @@ from vpc.vpc_stack import VpcStack
 from security.kms.kms_stack import KmsStack
 from security.iam.iam_stack import IamStack
 from security.security_group.security_group_stack import SecurityGroupStack
+from eks.eks_stack import EksStack
 
 # Information of project
 project = dict()
@@ -55,6 +56,14 @@ security_group_stack = SecurityGroupStack(
     project      = project,
     vpc          = vpc_stack.vpc,
     env          = cdk_environment)
+
+eks_stack = EksStack(
+    scope          = app,
+    construct_id   = f"{project['prefix']}-eks",
+    project        = project,
+    vpc            = vpc_stack.vpc,
+    security_group = security_group_stack.security_group,
+    env            = cdk_environment)
 
 # app synth -> cloudformation template
 app.synth()
