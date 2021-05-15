@@ -13,6 +13,7 @@ from aws_cdk import core
 from vpc.vpc_stack import VpcStack
 from security.kms.kms_stack import KmsStack
 from security.iam.iam_stack import IamStack
+from security.nacl.nacl_stack import NaclStack
 from security.security_group.security_group_stack import SecurityGroupStack
 from eks.eks_stack import EksStack
 
@@ -63,6 +64,13 @@ eks_stack = EksStack(
     project        = project,
     vpc            = vpc_stack.vpc,
     security_group = security_group_stack.security_group,
+    env            = cdk_environment)
+
+nacl_stack = NaclStack(
+    scope          = app,
+    construct_id   = f"{project['prefix']}-nacl",
+    project        = project,
+    vpc            = vpc_stack.vpc,
     env            = cdk_environment)
 
 # app synth -> cloudformation template
