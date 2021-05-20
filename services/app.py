@@ -17,6 +17,7 @@ from security.nacl.nacl_stack import NaclStack
 from security.security_group.security_group_stack import SecurityGroupStack
 from eks.eks_stack import EksStack
 from ec2.instance_stack import EC2InstanceStack
+from ec2.asg_stack import AutoScalingGroupStack
 from elb.elb_stack import ElasticLoadBalancerStack
 
 # Information of project
@@ -90,6 +91,15 @@ elb_stack = ElasticLoadBalancerStack(
     project        = project,
     vpc            = vpc_stack.vpc,
     security_group = security_group_stack.security_group,
+    env            = cdk_environment)
+
+asg_stack = AutoScalingGroupStack(
+    scope          = app,
+    construct_id   = f"{project['prefix']}-asg",
+    project        = project,
+    vpc            = vpc_stack.vpc,
+    security_group = security_group_stack.security_group,
+    target_group   = elb_stack.target_group,
     env            = cdk_environment)
 
 # app synth -> cloudformation template
