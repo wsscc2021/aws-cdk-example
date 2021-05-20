@@ -28,6 +28,7 @@ class AutoScalingGroupStack(core.Stack):
             ])
 
         # AMI
+        # https://github.com/aws/aws-cdk/blob/master/packages/%40aws-cdk/aws-ec2/test/example.images.lit.ts
         ami = aws_ec2.MachineImage.latest_amazon_linux(
             generation=aws_ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
             edition=aws_ec2.AmazonLinuxEdition.STANDARD,
@@ -41,6 +42,7 @@ class AutoScalingGroupStack(core.Stack):
         #     })
 
         # Auto Scaling Group
+        # https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_autoscaling/AutoScalingGroup.html
         aws_autoscaling.AutoScalingGroup(self, "asg-foo-app",
             auto_scaling_group_name=f"{self.project['prefix']}-asg-foo-app",
             # tpye of instance

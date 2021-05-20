@@ -32,6 +32,7 @@ class EksStack(core.Stack):
 
     def create_kms(self):
         # KMS CMK for EKS
+        # https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_kms/Key.html
         self.kms_key = dict()
         self.kms_key['eks-cluster'] = aws_kms.Key(self, "cmk-eks-cluster",
             alias                    = f"alias/{self.project['prefix']}-cmk-eks-cluster",
@@ -91,6 +92,7 @@ class EksStack(core.Stack):
 
     def create_eks_cluster(self):
         # EkS Cluster
+        # https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_eks/Cluster.html
         self.eks_cluster = aws_eks.Cluster(self, "eks-cluster",
             default_capacity=0,
             # default_capacity_instance=None,
@@ -139,6 +141,8 @@ class EksStack(core.Stack):
             security_group=self.security_group['eks-nodegroup'])
         
     def create_nodegroup(self):
+        # managed node group
+        # https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_eks/Nodegroup.html
         self.nodegroup = dict()
         self.nodegroup['core'] = aws_eks.Nodegroup(self, "nodegroup-core", 
             cluster=self.eks_cluster,
@@ -166,6 +170,8 @@ class EksStack(core.Stack):
             ))
 
     def create_service_account(self):
+        # service account
+        # https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_eks/ServiceAccount.html
         self.service_account = dict()
         self.add_service_account(
             name        = "aws-load-balancer-controller",
@@ -201,6 +207,8 @@ class EksStack(core.Stack):
             ])
 
     def add_service_account(self, name, namespace, policy_file=None, managed_policies=[]):
+        # service account
+        # https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_eks/ServiceAccount.html
         self.service_account[name] = aws_eks.ServiceAccount(
             self, f"sa-{name}",
             cluster=self.eks_cluster,
@@ -216,6 +224,8 @@ class EksStack(core.Stack):
             self.service_account[name].role.add_managed_policy(policy)
 
     def install_helm_chart(self):
+        # Helm chart into EkS Cluster
+        # https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_eks/Cluster.html
         self.eks_cluster.add_helm_chart(
             "helm-aws-load-balancer-controller",
             repository="https://aws.github.io/eks-charts",

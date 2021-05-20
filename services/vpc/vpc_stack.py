@@ -7,6 +7,8 @@ class VpcStack(core.Stack):
     def __init__(self, scope: core.Construct, construct_id: str, project: dict, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
+        # vpc
+        # https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_ec2/Vpc.html
         self.vpc = aws_ec2.Vpc(self, "vpc",
             cidr="10.0.0.0/16",
             max_azs=3,

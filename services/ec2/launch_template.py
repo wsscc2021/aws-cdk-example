@@ -17,6 +17,7 @@ class LaunchTemplateStack(core.Stack):
         self.security_group = security_group
 
         # LaunchTemplate
+        # https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_ec2/LaunchTemplate.html
         self.launch_template = dict()
         self.launch_template['foo-app'] = aws_ec2.LaunchTemplate(self, "lt-foo-app",
             block_devices=[

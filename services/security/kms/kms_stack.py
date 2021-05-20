@@ -13,8 +13,9 @@ class KmsStack(core.Stack):
 
         # init
         self.kms_key = dict()
-
-        # For eks-cluster
+        
+        # KMS CMK for EKS
+        # https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_kms/Key.html
         self.kms_key['eks-cluster'] = aws_kms.Key(self, "eks-cluster",
             alias                    = f"alias/{project['prefix']}-eks-cluster",
             description              = "",
