@@ -84,5 +84,13 @@ ec2_instance_stack = EC2InstanceStack(
     security_group = security_group_stack.security_group,
     env            = cdk_environment)
 
+elb_stack = ElasticLoadBalancerStack(
+    scope          = app,
+    construct_id   = f"{project['prefix']}-elb",
+    project        = project,
+    vpc            = vpc_stack.vpc,
+    security_group = security_group_stack.security_group,
+    env            = cdk_environment)
+
 # app synth -> cloudformation template
 app.synth()
