@@ -1,4 +1,5 @@
 '''
+    Dependency: None
     IAM Role은 Corss Reference 시에 Circular Dependency 문제가 자주 생기기 떄문에
     되도록이면 적용할 서비스 스택에서 생성해주는 것이 좋습니다.
 '''

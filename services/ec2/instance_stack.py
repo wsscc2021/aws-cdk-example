@@ -1,6 +1,5 @@
 '''
-    VPC와 Security Group에 의존적이다.
-    Instance profile은 해당 스택 내부에서 별도로 만들어주는 게 좋다
+    Dependency: vpc, security_group
 '''
 from aws_cdk import (
     core, aws_iam, aws_ec2
@@ -77,7 +76,6 @@ class EC2InstanceStack(core.Stack):
 
     def create_security_group(self):
         # 원래는 security group stack에서 별도로 생성해준다.
-        # ㅇㅇ
         self.security_group['foo-app'] = aws_ec2.SecurityGroup(self, 'sg-foo-app',
             vpc                 = self.vpc,
             security_group_name = f"{self.project['prefix']}-sg-foo-app",

@@ -16,6 +16,20 @@ class LaunchTemplateStack(core.Stack):
         self.vpc            = vpc
         self.security_group = security_group
 
+        # AMI
+        # https://github.com/aws/aws-cdk/blob/master/packages/%40aws-cdk/aws-ec2/test/example.images.lit.ts
+        ami = aws_ec2.MachineImage.latest_amazon_linux(
+            generation=aws_ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
+            edition=aws_ec2.AmazonLinuxEdition.STANDARD,
+            virtualization=aws_ec2.AmazonLinuxVirt.HVM,
+            storage=aws_ec2.AmazonLinuxStorage.GENERAL_PURPOSE,
+            cpu_type=aws_ec2.AmazonLinuxCpuType.X86_64)
+        # ami = aws_ec2.MachineImage.from_ssm_parameter("/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2")
+        # ami = aws_ec2.MachineImage.genericLinux({
+        #     'us-east-1': 'ami-97785bed',
+        #     'eu-west-1': 'ami-12345678',
+        #     })
+
         # LaunchTemplate
         # https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_ec2/LaunchTemplate.html
         self.launch_template = dict()

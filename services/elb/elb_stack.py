@@ -14,9 +14,9 @@ class ElasticLoadBalancerStack(core.Stack):
         self.project = project
         self.vpc = vpc
         self.security_group = security_group
-        self.create_security_group()
         self.target_group = dict()
         self.elb = dict()
+        self.create_security_group() # 원래는 security-group stack에서 생성함
 
         # Target Group
         # https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_elasticloadbalancingv2/TargetGroupBase.html
@@ -86,6 +86,7 @@ class ElasticLoadBalancerStack(core.Stack):
         )
         
     def create_security_group(self):
+        # 원래는 security group stack에서 별도로 생성해줍시다!
         self.security_group['ext-alb'] = aws_ec2.SecurityGroup(self, 'sg-ext-alb',
             vpc                 = self.vpc,
             security_group_name = f"{self.project['prefix']}-sg-ext-alb",

@@ -1,15 +1,12 @@
+'''
+    Dependency: vpc, security_group
+'''
 from aws_cdk import (
     core, aws_ec2, aws_iam, aws_kms, aws_eks
 )
 import json
 
 class EksStack(core.Stack):
-    '''
-        1. EKS Stack은 VPC Stack과 Security Group Stack에 의존적입니다.
-           argument로 vpc와 security group를 넣어줘야 합니다.
-        2. kms key와 role은 eks stack 내에서 생성해줍니다.
-        3. key pair를 미리 생성해야 합니다.
-    '''
     def __init__(self, scope: core.Construct, construct_id: str, project: dict, vpc, security_group: dict, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
         

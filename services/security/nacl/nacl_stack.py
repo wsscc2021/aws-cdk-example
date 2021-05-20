@@ -1,15 +1,13 @@
+'''
+    Dependency: vpc
+    VPC Recommended Network ACL Rules
+    -> https://docs.aws.amazon.com/ko_kr/vpc/latest/userguide/VPC_Scenario2.html#nacl-rules-scenario-2
+'''
 from aws_cdk import (
     core, aws_ec2
 )
 
 class NaclStack(core.Stack):
-
-    '''
-        1. nacl은 VPC에 의존성이 있습니다.
-           nacl stack을 생성하기에 앞서 VPC stack을 생성하고, vpc를 argument로 넣어야합니다.
-        2. VPC Recommended Network ACL Rules
-           https://docs.aws.amazon.com/ko_kr/vpc/latest/userguide/VPC_Scenario2.html#nacl-rules-scenario-2
-    '''
     def __init__(self, scope: core.Construct, construct_id: str, project: dict, vpc, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 

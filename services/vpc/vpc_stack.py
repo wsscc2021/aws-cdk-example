@@ -1,3 +1,6 @@
+'''
+    Dependency: None
+'''
 from aws_cdk import (
     core, aws_ec2
 )
