@@ -17,7 +17,6 @@ class EksStack(core.Stack):
         self.vpc            = vpc
         self.project        = project
         self.security_group = security_group
-        self.keypair_name   = "dev-useast1"
 
         # create resource
         # EKS Cluster는 생성되는 데 오랜 시간이 소모됩니다. Rollback 시간을 줄이려면 순차적으로 하나씩 생성해야합니다. 
@@ -136,7 +135,7 @@ class EksStack(core.Stack):
                 )
             ],
             instance_type=aws_ec2.InstanceType("t3.xlarge"),
-            key_name=self.keypair_name,
+            key_name=self.project['keypair'],
             launch_template_name=f"{self.project['prefix']}-lt-nodegroup-core",
             security_group=self.security_group['eks-nodegroup'])
         
