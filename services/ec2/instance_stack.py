@@ -24,7 +24,37 @@ class EC2InstanceStack(core.Stack):
             assumed_by  = aws_iam.ServicePrincipal("ec2.amazonaws.com"),
             managed_policies=[
                 aws_iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AmazonEC2RoleforSSM")
-            ])
+            ],
+            inline_policies={
+                "s3-useast1-artifact-read-only": aws_iam.PolicyDocument(
+                    statements=[
+                        aws_iam.PolicyStatement(
+                            sid="AllowObjectInBucket",
+                            effect=aws_iam.Effect.ALLOW,
+                            actions=[
+                                "s3:ListBucket"
+                            ],
+                            resources=[
+                                "arn:aws:s3:::useast1-artifact"
+                            ]
+                            # principals=None,
+                            # conditions=None
+                        ),
+                        aws_iam.PolicyStatement(
+                            sid="AllObjectActions",
+                            effect=aws_iam.Effect.ALLOW,
+                            actions=[
+                                "s3:GetObject"
+                            ],
+                            resources=[
+                                "arn:aws:s3:::useast1-artifact/*"
+                            ]
+                            # principals=None,
+                            # conditions=None
+                        ),
+                    ]
+                )
+            })
 
         # AMI
         # https://github.com/aws/aws-cdk/blob/master/packages/%40aws-cdk/aws-ec2/test/example.images.lit.ts
