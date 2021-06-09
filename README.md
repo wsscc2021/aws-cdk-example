@@ -20,7 +20,9 @@ cp -r aws-cdk-example/solutions/basis/* new-project
 
 /services 디렉터리 내의 example파일들을 참조하여 과제에 맞는 cdk 추가 작성
 ```
-cdk install -r requirements.txt
+python3 -m venv .venv
+source .venv/bin/activate
+pip3 install -r requirements.txt
 cdk list
 cdk deploy <stack-name>
 ```
