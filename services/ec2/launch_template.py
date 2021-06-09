@@ -25,9 +25,10 @@ class LaunchTemplateStack(core.Stack):
             storage=aws_ec2.AmazonLinuxStorage.GENERAL_PURPOSE,
             cpu_type=aws_ec2.AmazonLinuxCpuType.X86_64)
         # ami = aws_ec2.MachineImage.from_ssm_parameter("/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2")
-        # ami = aws_ec2.MachineImage.genericLinux({
-        #     'us-east-1': 'ami-97785bed',
-        #     'eu-west-1': 'ami-12345678',
+        # ami = aws_ec2.MachineImage.generic_linux(
+        #     ami_map={
+        #         'us-east-1': 'ami-97785bed',
+        #         'eu-west-1': 'ami-12345678',
         #     })
 
         # LaunchTemplate
