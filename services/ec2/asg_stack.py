@@ -36,10 +36,15 @@ class AutoScalingGroupStack(core.Stack):
             storage=aws_ec2.AmazonLinuxStorage.GENERAL_PURPOSE,
             cpu_type=aws_ec2.AmazonLinuxCpuType.X86_64)
         # ami = aws_ec2.MachineImage.from_ssm_parameter("/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2")
-        # ami = aws_ec2.MachineImage.genericLinux({
-        #     'us-east-1': 'ami-97785bed',
-        #     'eu-west-1': 'ami-12345678',
+        # ami = aws_ec2.MachineImage.generic_linux(
+        #     ami_map={
+        #         'us-east-1': 'ami-97785bed',
+        #         'eu-west-1': 'ami-12345678',
         #     })
+
+        # read user-data
+        with open("./ec2/userdata.sh") as f:
+            userdata = f.read()
 
         # Auto Scaling Group
         # https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_autoscaling/AutoScalingGroup.html
@@ -73,7 +78,7 @@ class AutoScalingGroupStack(core.Stack):
                 )
             ],
             # user-data
-            user_data=None,
+            user_data=aws_ec2.UserData.custom(userdata),
             # asg options
             desired_capacity=2,
             min_capacity=2,

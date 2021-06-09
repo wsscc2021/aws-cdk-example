@@ -71,6 +71,10 @@ class EC2InstanceStack(core.Stack):
         #         'eu-west-1': 'ami-12345678',
         #     })
 
+        # userdata
+        # with open("./ec2/userdata.sh") as f:
+        #     userdata = f.read()
+
         # EC2 Instance
         # https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_ec2/Instance.html
         aws_ec2.Instance(self, "ec2-foo-app",
@@ -101,6 +105,7 @@ class EC2InstanceStack(core.Stack):
             security_group=self.security_group['foo-app'],
             source_dest_check=None,
             user_data=None,
+            # user_data=aws_ec2.UserData.custom(userdata),
             user_data_causes_replacement=None,
             vpc_subnets=aws_ec2.SubnetSelection(subnet_type=aws_ec2.SubnetType.PRIVATE))
 

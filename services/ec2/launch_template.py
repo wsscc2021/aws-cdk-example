@@ -31,6 +31,10 @@ class LaunchTemplateStack(core.Stack):
         #         'eu-west-1': 'ami-12345678',
         #     })
 
+        # read user-data
+        # with open("./ec2/userdata.sh") as f:
+        #     userdata = f.read()
+
         # LaunchTemplate
         # https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_ec2/LaunchTemplate.html
         self.launch_template = dict()
@@ -61,4 +65,5 @@ class LaunchTemplateStack(core.Stack):
             role=self.role['foo-app'],
             security_group=self.security_group['foo-app'],
             spot_options=None,
+            # user_data=aws_ec2.UserData.custom(userdata),
             user_data=None)
