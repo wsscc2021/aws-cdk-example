@@ -14,6 +14,7 @@ from vpc.vpc_stack import VpcStack
 from security_group.security_group_stack import SecurityGroupStack
 from elb.elb_stack import ElasticLoadBalancerStack
 from ec2.asg_stack import AutoScalingGroupStack
+from cloudfront.cloudfront_stack import CloudFrontStack
 
 # Information of project
 project = dict()
@@ -61,6 +62,14 @@ asg_stack = AutoScalingGroupStack(
     security_group = security_group_stack.security_group,
     target_group   = elb_stack.target_group,
     env            = cdk_environment)
+
+cloudfront_stack = CloudFrontStack(
+    scope          = app,
+    construct_id   = f"{project['prefix']}-cloudfront",
+    project        = project,
+    elb            = elb_stack.elb,
+    env            = cdk_environment
+).add_dependency(elb_stack)
 
 # app synth -> cloudformation template
 app.synth()
