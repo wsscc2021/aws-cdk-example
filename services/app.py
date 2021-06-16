@@ -19,6 +19,7 @@ from eks.eks_stack import EksStack
 from ec2.instance_stack import EC2InstanceStack
 from ec2.asg_stack import AutoScalingGroupStack
 from elb.elb_stack import ElasticLoadBalancerStack
+from rds.rds_stack import RdsStack
 
 # Information of project
 project = dict()
@@ -100,6 +101,14 @@ asg_stack = AutoScalingGroupStack(
     vpc            = vpc_stack.vpc,
     security_group = security_group_stack.security_group,
     target_group   = elb_stack.target_group,
+    env            = cdk_environment)
+
+rds_stack = RdsStack(
+    scope          = app,
+    construct_id   = f"{project['prefix']}-rds",
+    project        = project,
+    vpc            = vpc_stack.vpc,
+    security_group = security_group_stack.security_group,
     env            = cdk_environment)
 
 # app synth -> cloudformation template
