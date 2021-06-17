@@ -74,7 +74,7 @@ class RdsStack(core.Stack):
         # self.add_aurora_mysql()
         # self.add_aurora_postgres()
         # self.add_mysql()
-        self.add_postgres()
+        # self.add_postgres()
     
     def add_aurora_mysql(self):
         # Parameter group
@@ -85,8 +85,6 @@ class RdsStack(core.Stack):
             parameters={
                 "max_connections": "1500"
             })
-        
-        # Options group
         # database cluster
         aws_rds.DatabaseCluster(self, "aurora_mysql",
             cluster_identifier=f"{self.project['prefix']}-rds-aurora-mysql",
@@ -146,8 +144,6 @@ class RdsStack(core.Stack):
             parameters={
                 "max_connections": "1500"
             })
-        
-        # Options group
         # database cluster
         aws_rds.DatabaseCluster(self, "aurora_postgres",
             cluster_identifier=f"{self.project['prefix']}-rds-aurora-postgres",
@@ -206,7 +202,6 @@ class RdsStack(core.Stack):
             parameters={
                 "max_connections": "1500"
             })
-        
         # database instance
         aws_rds.DatabaseInstance(self, "mysql",
             engine=aws_rds.DatabaseInstanceEngine.mysql(
@@ -280,7 +275,6 @@ class RdsStack(core.Stack):
             parameters={
                 "max_connections": "1500"
             })
-        
         # database instance
         aws_rds.DatabaseInstance(self, "postgres",
             engine=aws_rds.DatabaseInstanceEngine.postgres(
