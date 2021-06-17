@@ -34,3 +34,25 @@ class VpcStack(core.Stack):
                 )
             ]
         )
+
+        # vpc_endpoint
+        # self.add_vpc_endpoint()
+
+    def add_vpc_endpoint(self):
+        # vpc endpoint
+        # Gateway
+        aws_ec2.GatewayVpcEndpoint(self, "vpc-endpoint-s3-gateway",
+            vpc=self.vpc,
+            # https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_ec2/InterfaceVpcEndpointAwsService.html
+            service=aws_ec2.GatewayVpcEndpointAwsService.S3,
+            subnets=self.vpc.private_subnets)
+        # Interface
+        aws_ec2.InterfaceVpcEndpoint(self, "vpc-endpoint-ssm-interface",
+            vpc=self.vpc,
+            # https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_ec2/InterfaceVpcEndpointAwsService.html
+            service=aws_ec2.InterfaceVpcEndpointAwsService.SSM,
+            lookup_supported_azs=None,
+            open=None,
+            private_dns_enabled=None,
+            security_groups=None,
+            subnets=aws_ec2.SubnetSelection(subnet_type=aws_ec2.SubnetType.PRIVATE))
