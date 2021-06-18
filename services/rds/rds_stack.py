@@ -73,7 +73,7 @@ class RdsStack(core.Stack):
         # database
         # self.add_aurora_mysql()
         # self.add_aurora_postgres()
-        # self.add_mysql()
+        self.add_mysql()
         # self.add_postgres()
     
     def add_aurora_mysql(self):
@@ -203,7 +203,7 @@ class RdsStack(core.Stack):
                 "max_connections": "1500"
             })
         # database instance
-        aws_rds.DatabaseInstance(self, "mysql",
+        mysql_instance = aws_rds.DatabaseInstance(self, "mysql",
             engine=aws_rds.DatabaseInstanceEngine.mysql(
                 version=aws_rds.MysqlEngineVersion.VER_8_0_21),
             instance_identifier=f"{self.project['prefix']}-mysql",
@@ -265,6 +265,59 @@ class RdsStack(core.Stack):
             preferred_backup_window=None,
             preferred_maintenance_window=None,
         )
+        # read-replica        
+        # aws_rds.DatabaseInstanceReadReplica(self, "mysql-read-replica",
+        #     source_database_instance=mysql_instance,
+        #     instance_identifier=f"{self.project['prefix']}-mysql-rr1",
+        #     instance_type=aws_ec2.InstanceType.of(
+        #         instance_class=aws_ec2.InstanceClass.BURSTABLE3,
+        #         instance_size=aws_ec2.InstanceSize.MICRO
+        #     ),
+        #     # Storage
+        #     storage_type=aws_rds.StorageType.GP2,
+        #     max_allocated_storage=1000,
+        #     iops=None,
+        #     storage_encrypted=True,
+        #     storage_encryption_key=self.kms_key['rds'],
+        #     # Network
+        #     vpc=self.vpc,
+        #     multi_az=True,
+        #     availability_zone=None,
+        #     port=3306,
+        #     subnet_group=self.subnet_group,
+        #     vpc_placement=None,
+        #     vpc_subnets=None,
+        #     publicly_accessible=False,
+        #     security_groups=[self.security_group['example']],
+        #     # Authentication
+        #     iam_authentication=None,
+        #     domain=None, # kerberos authentication
+        #     domain_role=None,
+        #     # monitoring and logging
+        #     monitoring_interval=core.Duration.seconds(60),
+        #     monitoring_role=self.role['monitoring'],
+        #     enable_performance_insights=None,
+        #     performance_insight_encryption_key=None,
+        #     performance_insight_retention=None,
+        #     cloudwatch_logs_exports=["error","slowquery"], # ["error","general","slowquery"]
+        #     cloudwatch_logs_retention=aws_logs.RetentionDays.TWO_WEEKS,
+        #     cloudwatch_logs_retention_role=None, # Default, create new role
+        #     # Advanced
+        #     removal_policy=core.RemovalPolicy.DESTROY,
+        #     deletion_protection=False,
+        #     processor_features=None,
+        #     s3_export_buckets=None,
+        #     s3_export_role=None,
+        #     s3_import_buckets=None,
+        #     s3_import_role=None,
+        #     auto_minor_version_upgrade=None,
+        #     # backup
+        #     backup_retention=None,
+        #     copy_tags_to_snapshot=None,
+        #     delete_automated_backups=None,   
+        #     preferred_backup_window=None,
+        #     preferred_maintenance_window=None,
+        # )
     
     def add_postgres(self):
         # Parameter group
