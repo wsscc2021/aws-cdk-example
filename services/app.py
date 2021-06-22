@@ -20,6 +20,7 @@ from ec2.instance_stack import EC2InstanceStack
 from ec2.asg_stack import AutoScalingGroupStack
 from elb.elb_stack import ElasticLoadBalancerStack
 from rds.rds_stack import RdsStack
+from efs.efs_stack import EfsStack
 
 # Information of project
 project = dict()
@@ -106,6 +107,14 @@ asg_stack = AutoScalingGroupStack(
 rds_stack = RdsStack(
     scope          = app,
     construct_id   = f"{project['prefix']}-rds",
+    project        = project,
+    vpc            = vpc_stack.vpc,
+    security_group = security_group_stack.security_group,
+    env            = cdk_environment)
+
+efs_stack = EfsStack(
+    scope          = app,
+    construct_id   = f"{project['prefix']}-efs",
     project        = project,
     vpc            = vpc_stack.vpc,
     security_group = security_group_stack.security_group,
