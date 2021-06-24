@@ -16,6 +16,36 @@ class ElasticacheStack(core.Stack):
         self.role = dict()
         self.kms_key = dict()
 
+        # kms cmk
+        self.kms_key['redis'] = aws_kms.Key(self, "kms-redis",
+            alias                    = f"alias/{project['prefix']}-redis",
+            description              = "",
+            admins                   = None,
+            enabled                  = True,
+            enable_key_rotation      = True,
+            pending_window           = core.Duration.days(7),
+            removal_policy           = core.RemovalPolicy.DESTROY,
+            policy                   = aws_iam.PolicyDocument(
+                statements=[
+                    aws_iam.PolicyStatement(
+                        sid="Enable IAM User Permission",
+                        actions=[
+                            "kms:*"
+                        ],
+                        conditions=None,
+                        effect=aws_iam.Effect.ALLOW,
+                        not_actions=None,
+                        not_principals=None,
+                        not_resources=None,
+                        principals=[
+                            aws_iam.AccountRootPrincipal()
+                        ],
+                        resources=["*"]
+                    )
+                ]
+            )
+        )
+
         # subnet group
         subnet_group = aws_elasticache.CfnSubnetGroup(self, "redis_subnet_group",
             cache_subnet_group_name=f"{self.project['prefix']}-redis-subnetgroup",
@@ -46,7 +76,7 @@ class ElasticacheStack(core.Stack):
             #security
             at_rest_encryption_enabled=True,
             transit_encryption_enabled=True,
-            kms_key_id=None,
+            kms_key_id=self.kms_key['redis'].key_id,
             auth_token=None,
             #maintain
             auto_minor_version_upgrade=None,
