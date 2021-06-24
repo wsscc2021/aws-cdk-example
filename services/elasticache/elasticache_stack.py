@@ -91,7 +91,7 @@ class ElasticacheStack(core.Stack):
             snapshot_window=None,
             tags=None,
             user_group_ids=None
-        )
+        ).add_depends_on(subnet_group)
         
         # memcached
         aws_elasticache.CfnCacheCluster(self, "memcached-cluster",
@@ -118,4 +118,4 @@ class ElasticacheStack(core.Stack):
             snapshot_retention_limit=None,
             snapshot_window=None,
             tags=None
-        )
+        ).add_depends_on(subnet_group)
