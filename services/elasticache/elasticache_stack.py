@@ -62,3 +62,30 @@ class ElasticacheStack(core.Stack):
             tags=None,
             user_group_ids=None
         )
+        
+        # memcached
+        aws_elasticache.CfnCacheCluster(self, "memcached-cluster",
+            #identify
+            cluster_name=f"{self.project['prefix']}-memcached-cluster",
+            #specify
+            cache_node_type="cache.t3.small",
+            engine="memcached",
+            engine_version=None,
+            num_cache_nodes=3,
+            #network
+            az_mode="cross-az",
+            cache_parameter_group_name=None,
+            cache_security_group_names=None,
+            cache_subnet_group_name=subnet_group.cache_subnet_group_name,
+            vpc_security_group_ids=[self.security_group['example'].security_group_id],
+            port=11211,
+            #advanced
+            auto_minor_version_upgrade=None,
+            # log_delivery_configurations=None,
+            notification_topic_arn=None,
+            snapshot_arns=None,
+            snapshot_name=None,
+            snapshot_retention_limit=None,
+            snapshot_window=None,
+            tags=None
+        )
