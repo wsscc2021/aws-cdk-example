@@ -64,7 +64,7 @@ class ElasticacheStack(core.Stack):
             cache_node_type="cache.t3.small",
             engine="redis",
             engine_version=None,
-            num_node_groups=3, # number of shard
+            num_node_groups=2, # number of shard
             replicas_per_node_group=3, # number of replica
             port=6379,
             multi_az_enabled=True,
@@ -101,7 +101,7 @@ class ElasticacheStack(core.Stack):
             cache_node_type="cache.t3.small",
             engine="memcached",
             engine_version=None,
-            num_cache_nodes=3,
+            num_cache_nodes=2,
             #network
             az_mode="cross-az",
             cache_parameter_group_name=None,
