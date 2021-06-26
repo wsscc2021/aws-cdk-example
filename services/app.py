@@ -22,6 +22,8 @@ from elb.elb_stack import ElasticLoadBalancerStack
 from rds.rds_stack import RdsStack
 from efs.efs_stack import EfsStack
 from elasticache.elasticache_stack import ElasticacheStack
+from s3.s3_stack import S3Stack
+from cloudfront.cloudfront_stack import CloudFrontStack
 
 # Information of project
 project = dict()
@@ -57,6 +59,12 @@ kms_stack = KmsStack(
     construct_id = f"{project['prefix']}-kms",
     project      = project,
     env          = cdk_environment)
+
+s3_stack = S3Stack(
+    scope          = app,
+    construct_id   = f"{project['prefix']}-s3",
+    project        = project,
+    env            = cdk_environment)
 
 security_group_stack = SecurityGroupStack(
     scope        = app,
@@ -127,6 +135,16 @@ elasitcache_stack = ElasticacheStack(
     project        = project,
     vpc            = vpc_stack.vpc,
     security_group = security_group_stack.security_group,
+    env            = cdk_environment)
+
+cloudfront_stack = CloudFrontStack(
+    scope          = app,
+    construct_id   = f"{project['prefix']}-cloudfront",
+    project        = project,
+    origin         = {
+        's3': s3_stack.s3_bucket,
+        'elb': None,
+    },
     env            = cdk_environment)
 
 # app synth -> cloudformation template
