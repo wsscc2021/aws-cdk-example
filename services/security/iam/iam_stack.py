@@ -59,6 +59,10 @@ class IamStack(core.Stack):
             role_name   = f"{project['prefix']}-role-foo-app",
             description = "",
             assumed_by  = aws_iam.ServicePrincipal("ec2.amazonaws.com"),
+            # assumed_by  = aws_iam.CompositePrincipal(
+            #     aws_iam.ServicePrincipal("lambda.amazonaws.com"),
+            #     aws_iam.ServicePrincipal("edgelambda.amazonaws.com")
+            # ),
             # external_id=None,
             # external_ids=None,
             inline_policies={
