@@ -33,6 +33,7 @@ setuptools.setup(
         "aws-cdk.aws_cloudfront==1.100.0",
         "aws-cdk.aws_cloudfront_origins==1.100.0",
         "aws-cdk.aws_certificatemanager==1.100.0",
+        "aws-cdk.aws_lambda==1.100.0",
     ],
 
     python_requires=">=3.6",

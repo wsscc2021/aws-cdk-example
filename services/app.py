@@ -24,6 +24,7 @@ from efs.efs_stack import EfsStack
 from elasticache.elasticache_stack import ElasticacheStack
 from s3.s3_stack import S3Stack
 from cloudfront.cloudfront_stack import CloudFrontStack
+from lambda_.lambda_stack import LambdaStack
 
 # Information of project
 project = dict()
@@ -65,6 +66,12 @@ s3_stack = S3Stack(
     construct_id   = f"{project['prefix']}-s3",
     project        = project,
     env            = cdk_environment)
+
+lambda_stack = LambdaStack(
+    scope        = app,
+    construct_id = f"{project['prefix']}-lambda",
+    project      = project,
+    env          = cdk_environment)
 
 security_group_stack = SecurityGroupStack(
     scope        = app,
