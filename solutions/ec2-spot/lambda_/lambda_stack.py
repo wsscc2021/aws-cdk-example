@@ -22,7 +22,37 @@ class LambdaStack(core.Stack):
             ),
             # external_id=None,
             # external_ids=None,
-            inline_policies=None,
+            inline_policies={
+                "inline_policy": aws_iam.PolicyDocument(
+                    statements=[
+                        aws_iam.PolicyStatement(
+                            sid="AllowEC2Describe",
+                            effect=aws_iam.Effect.ALLOW,
+                            actions=[
+                                "ec2:DescribeInstances",
+                                "ec2:DescribeSpotFleetRequests"
+                            ],
+                            resources=[
+                                "*"
+                            ]
+                            # principals=None,
+                            # conditions=None
+                        ),
+                        aws_iam.PolicyStatement(
+                            sid="AllowELBTargetDeregister",
+                            effect=aws_iam.Effect.ALLOW,
+                            actions=[
+                                "elasticloadbalancing:DeregisterTargets",
+                            ],
+                            resources=[
+                                f"arn:aws:elasticloadbalancing:*:{self.project['account']}:targetgroup/*/*"
+                            ]
+                            # principals=None,
+                            # conditions=None
+                        ),
+                    ]
+                )
+            },
             # max_session_duration=None,
             # path=None,
             # permissions_boundary=None,
