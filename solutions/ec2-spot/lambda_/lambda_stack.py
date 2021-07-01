@@ -26,11 +26,12 @@ class LambdaStack(core.Stack):
                 "inline_policy": aws_iam.PolicyDocument(
                     statements=[
                         aws_iam.PolicyStatement(
-                            sid="AllowEC2Describe",
+                            sid="AllowDescribe",
                             effect=aws_iam.Effect.ALLOW,
                             actions=[
                                 "ec2:DescribeInstances",
-                                "ec2:DescribeSpotFleetRequests"
+                                "ec2:DescribeSpotFleetRequests",
+                                "autoscaling:DescribeAutoScalingGroups",
                             ],
                             resources=[
                                 "*"
