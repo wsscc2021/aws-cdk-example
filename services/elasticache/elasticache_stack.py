@@ -16,6 +16,13 @@ class ElasticacheStack(core.Stack):
         self.role = dict()
         self.kms_key = dict()
 
+        # subnet group
+        self.subnet_group = aws_elasticache.CfnSubnetGroup(self, "redis_subnet_group",
+            cache_subnet_group_name=f"{self.project['prefix']}-redis-subnetgroup",
+            description="",
+            subnet_ids=[ subnet.subnet_id for subnet in self.vpc.isolated_subnets ]
+        )
+
         # kms cmk
         self.kms_key['redis'] = aws_kms.Key(self, "kms-redis",
             alias                    = f"alias/{project['prefix']}-redis",
@@ -46,14 +53,11 @@ class ElasticacheStack(core.Stack):
             )
         )
 
-        # subnet group
-        subnet_group = aws_elasticache.CfnSubnetGroup(self, "redis_subnet_group",
-            cache_subnet_group_name=f"{self.project['prefix']}-redis-subnetgroup",
-            description="",
-            subnet_ids=[ subnet.subnet_id for subnet in self.vpc.isolated_subnets ]
-        )
-        
-        # redis
+        # database
+        self.add_redis()
+        self.add_memcached()
+    
+    def add_redis(self):
         aws_elasticache.CfnReplicationGroup(self, "redis-cluster",
             #identify
             replication_group_id=f"{self.project['prefix']}-redis-cluster",
@@ -64,14 +68,14 @@ class ElasticacheStack(core.Stack):
             cache_node_type="cache.t3.small",
             engine="redis",
             engine_version=None,
-            num_node_groups=2, # number of shard
-            replicas_per_node_group=3, # number of replica
+            num_node_groups=3, # number of shard
+            replicas_per_node_group=2, # number of replica
             port=6379,
             multi_az_enabled=True,
             automatic_failover_enabled=True,
             cache_parameter_group_name=None,
             #network
-            cache_subnet_group_name=subnet_group.cache_subnet_group_name,
+            cache_subnet_group_name=self.subnet_group.cache_subnet_group_name,
             security_group_ids=[self.security_group['example'].security_group_id],
             #security
             at_rest_encryption_enabled=True,
@@ -91,9 +95,9 @@ class ElasticacheStack(core.Stack):
             snapshot_window=None,
             tags=None,
             user_group_ids=None
-        ).add_depends_on(subnet_group)
-        
-        # memcached
+        ).add_depends_on(self.subnet_group)
+    
+    def add_memcached(self):
         aws_elasticache.CfnCacheCluster(self, "memcached-cluster",
             #identify
             cluster_name=f"{self.project['prefix']}-memcached-cluster",
@@ -101,12 +105,12 @@ class ElasticacheStack(core.Stack):
             cache_node_type="cache.t3.small",
             engine="memcached",
             engine_version=None,
-            num_cache_nodes=2,
+            num_cache_nodes=3,
             #network
             az_mode="cross-az",
             cache_parameter_group_name=None,
             cache_security_group_names=None,
-            cache_subnet_group_name=subnet_group.cache_subnet_group_name,
+            cache_subnet_group_name=self.subnet_group.cache_subnet_group_name,
             vpc_security_group_ids=[self.security_group['example'].security_group_id],
             port=11211,
             #advanced
@@ -118,4 +122,4 @@ class ElasticacheStack(core.Stack):
             snapshot_retention_limit=None,
             snapshot_window=None,
             tags=None
-        ).add_depends_on(subnet_group)
+        ).add_depends_on(self.subnet_group)
