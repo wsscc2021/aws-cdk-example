@@ -21,7 +21,7 @@ project = dict()
 project['account'] = "242593025403"
 project['region']  = "us-east-1"
 project['env']     = "dev"
-project['name']    = "cdkworkshop"
+project['name']    = "samsungskills"
 project['prefix']  = f"{project['env']}-{project['name']}"
 project['keypair'] = "dev-useast1"
 
@@ -33,6 +33,7 @@ cdk_environment = core.Environment(
 # cdk construct
 app = core.App()
 
+# Stacks
 vpc_stack = VpcStack(
     scope        = app,
     construct_id = f"{project['prefix']}",

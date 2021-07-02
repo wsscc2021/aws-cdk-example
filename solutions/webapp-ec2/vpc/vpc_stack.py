@@ -29,3 +29,5 @@ class VpcStack(core.Stack):
                 )
             ]
         )
+
+        self.vpc.add_flow_log(id=f"{project['prefix']}-vpc-flow-log")
