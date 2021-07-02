@@ -31,6 +31,7 @@ setuptools.setup(
         "aws-cdk.aws_logs==1.100.0",
         "aws-cdk.aws_rds==1.100.0",
         "aws-cdk.aws_elasticache==1.100.0",
+        "aws-cdk.aws_efs==1.100.0",
     ],
 
     python_requires=">=3.6",

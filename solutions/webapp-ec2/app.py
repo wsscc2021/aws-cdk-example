@@ -17,6 +17,7 @@ from ec2.asg_stack import AutoScalingGroupStack
 from cloudfront.cloudfront_stack import CloudFrontStack
 from rds.rds_stack import RdsStack
 from elasticache.elasticache_stack import ElasticacheStack
+from efs.efs_stack import EfsStack
 
 # Information of project
 project = dict()
@@ -60,6 +61,14 @@ rds_stack = RdsStack(
 elasticache_stack = ElasticacheStack(
     scope          = app,
     construct_id   = f"{project['prefix']}-elasticache",
+    project        = project,
+    vpc            = vpc_stack.vpc,
+    security_group = security_group_stack.security_group,
+    env            = cdk_environment)
+
+efs_stack = EfsStack(
+    scope          = app,
+    construct_id   = f"{project['prefix']}-efs",
     project        = project,
     vpc            = vpc_stack.vpc,
     security_group = security_group_stack.security_group,
