@@ -28,6 +28,7 @@ class SecurityGroupStack(core.Stack):
             'app': 8080,
             'rds': 3306,
             'elasticache': 6379,
+            'efs': 2049,
         }
 
         # Security Group
@@ -45,6 +46,10 @@ class SecurityGroupStack(core.Stack):
             allow_all_outbound = False)
         self.add_security_group(
             name = "elasticache",
+            description = "",
+            allow_all_outbound = False)
+        self.add_security_group(
+            name = "efs",
             description = "",
             allow_all_outbound = False)
 
@@ -92,6 +97,14 @@ class SecurityGroupStack(core.Stack):
                 to_port=self.port_number['elasticache']),
             description = "")
         self.security_group['app'].add_egress_rule(
+            peer = self.security_group['efs'],
+            connection = aws_ec2.Port(
+                string_representation=self.generate_string_representation(), # Unique value
+                protocol=aws_ec2.Protocol.TCP,
+                from_port=self.port_number['efs'],
+                to_port=self.port_number['efs']),
+            description = "")
+        self.security_group['app'].add_egress_rule(
             peer = aws_ec2.Peer.ipv4('0.0.0.0/0'),
             connection = aws_ec2.Port(
                 string_representation=self.generate_string_representation(), # Unique value
@@ -126,6 +139,16 @@ class SecurityGroupStack(core.Stack):
                 protocol=aws_ec2.Protocol.TCP,
                 from_port=self.port_number['elasticache'],
                 to_port=self.port_number['elasticache']),
+            description = "")
+
+        # efs
+        self.security_group['efs'].add_ingress_rule(
+            peer = self.security_group['app'],
+            connection = aws_ec2.Port(
+                string_representation=self.generate_string_representation(), # Unique value
+                protocol=aws_ec2.Protocol.TCP,
+                from_port=self.port_number['efs'],
+                to_port=self.port_number['efs']),
             description = "")
 
     '''
