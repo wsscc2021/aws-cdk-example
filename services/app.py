@@ -136,7 +136,7 @@ efs_stack = EfsStack(
     security_group = security_group_stack.security_group,
     env            = cdk_environment)
 
-elasitcache_stack = ElasticacheStack(
+elasticache_stack = ElasticacheStack(
     scope          = app,
     construct_id   = f"{project['prefix']}-elasticache",
     project        = project,
