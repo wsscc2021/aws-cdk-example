@@ -15,6 +15,7 @@ from security_group.security_group_stack import SecurityGroupStack
 from elb.elb_stack import ElasticLoadBalancerStack
 from ec2.asg_stack import AutoScalingGroupStack
 from cloudfront.cloudfront_stack import CloudFrontStack
+from rds.rds_stack import RdsStack
 
 # Information of project
 project = dict()
@@ -46,6 +47,14 @@ security_group_stack = SecurityGroupStack(
     project      = project,
     vpc          = vpc_stack.vpc,
     env          = cdk_environment)
+
+rds_stack = RdsStack(
+    scope          = app,
+    construct_id   = f"{project['prefix']}-rds",
+    project        = project,
+    vpc            = vpc_stack.vpc,
+    security_group = security_group_stack.security_group,
+    env            = cdk_environment)
 
 elb_stack = ElasticLoadBalancerStack(
     scope          = app,
