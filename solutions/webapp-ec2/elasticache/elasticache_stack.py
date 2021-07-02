@@ -35,8 +35,9 @@ class ElasticacheStack(core.Stack):
             policy              = None
         )
 
+        # database
         self.add_redis()
-        self.add_memcached()
+        # self.add_memcached()
     
     def add_redis(self):
         # redis
