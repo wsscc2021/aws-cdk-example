@@ -24,7 +24,7 @@ class SecurityGroupStack(core.Stack):
         self.security_group = dict()
         self.string_representation=1
         self.port_number = {
-            'ext-alb': 443,
+            'ext-alb': 80,
             'app': 8080,
             'rds': 3306,
             'elasticache': 6379,

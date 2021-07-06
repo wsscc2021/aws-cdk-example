@@ -56,7 +56,7 @@ class ElasticLoadBalancerStack(core.Stack):
             load_balancer_name=f"{self.project['prefix']}-ext-alb",
             vpc_subnets=aws_ec2.SubnetSelection(subnet_type=aws_ec2.SubnetType.PUBLIC))
         self.elb['ext-alb'].add_listener("listener-ext-alb",
-            certificate_arns=["arn:aws:acm:us-east-1:242593025403:certificate/099e74ff-1a17-4b79-b1bc-6b3fe2c85dfd"],
+            certificate_arns=None,
             certificates=None,
             default_action=aws_elasticloadbalancingv2.ListenerAction.fixed_response(
                 status_code=404,
@@ -65,7 +65,7 @@ class ElasticLoadBalancerStack(core.Stack):
             ),
             default_target_groups=None,
             open=None,
-            port=443,
+            port=80,
             protocol=None,
             ssl_policy=None
         ).add_action(
@@ -83,22 +83,3 @@ class ElasticLoadBalancerStack(core.Stack):
             path_patterns=["/*"],
             priority=10
         )
-        
-    def create_security_group(self):
-        # 원래는 security group stack에서 별도로 생성해줍시다!
-        self.security_group['ext-alb'] = aws_ec2.SecurityGroup(self, 'sg-ext-alb',
-            vpc                 = self.vpc,
-            security_group_name = f"{self.project['prefix']}-sg-ext-alb",
-            description         = "",
-            allow_all_outbound  = True)
-        core.Tags.of(self.security_group['ext-alb']).add(
-            "Name",
-            f"{self.project['prefix']}-sg-ext-alb")
-        self.security_group['ext-alb'].add_ingress_rule(
-            peer = aws_ec2.Peer.ipv4('0.0.0.0/0'),
-            connection = aws_ec2.Port(
-                protocol=aws_ec2.Protocol.TCP,
-                string_representation="1", # Unique value
-                from_port=443,
-                to_port=443),
-            description = "")
