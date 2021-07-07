@@ -2,7 +2,7 @@
     Dependency: vpc, security_group, elb
 '''
 from aws_cdk import (
-    core, aws_iam, aws_ec2, aws_autoscaling
+    core, aws_iam, aws_ec2, aws_kms, aws_autoscaling
 )
 
 class AutoScalingGroupStack(core.Stack):
@@ -16,6 +16,12 @@ class AutoScalingGroupStack(core.Stack):
         self.security_group = security_group
         self.target_group   = target_group
 
+        self.add_role()
+        self.add_cmk()
+        self.add_asg()
+        self.attach_target_group()
+
+    def add_role(self):
         # Create Role
         self.role = dict()
         self.role['app'] = aws_iam.Role(self, "role-app",
@@ -56,6 +62,78 @@ class AutoScalingGroupStack(core.Stack):
                 )
             })
 
+    def add_cmk(self):
+        self.kms_key = dict()
+        self.kms_key['ebs'] = aws_kms.Key(self, "ebs_cmk",
+            alias               = f"alias/{self.project['prefix']}-ebs",
+            description         = "",
+            admins              = None,
+            enabled             = True,
+            enable_key_rotation = True,
+            pending_window      = core.Duration.days(7),
+            removal_policy      = core.RemovalPolicy.DESTROY,
+            policy              = aws_iam.PolicyDocument(
+                statements=[
+                    aws_iam.PolicyStatement(
+                        sid="Enable IAM User Permission",
+                        actions=[
+                            "kms:*"
+                        ],
+                        conditions=None,
+                        effect=aws_iam.Effect.ALLOW,
+                        not_actions=None,
+                        not_principals=None,
+                        not_resources=None,
+                        principals=[
+                            aws_iam.AccountRootPrincipal()
+                        ],
+                        resources=["*"]
+                    ),
+                    aws_iam.PolicyStatement(
+                        sid="Enable AutoScalingGroup Permission",
+                        actions=[
+                            "kms:Encrypt",
+                            "kms:Decrypt",
+                            "kms:ReEncrypt*",
+                            "kms:GenerateDataKey*",
+                            "kms:DescribeKey"
+                        ],
+                        conditions=None,
+                        effect=aws_iam.Effect.ALLOW,
+                        not_actions=None,
+                        not_principals=None,
+                        not_resources=None,
+                        principals=[
+                            aws_iam.ArnPrincipal(arn="arn:aws:iam::242593025403:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling"),
+                        ],
+                        resources=["*"]
+                    ),
+                    aws_iam.PolicyStatement(
+                        sid="Enable AutoScalingGroup Permission",
+                        actions=[
+                            "kms:CreateGrant",
+                            "kms:ListGrants",
+                            "kms:RevokeGrant"
+                        ],
+                        conditions={
+                            "Bool": {
+                                "kms:GrantIsForAWSResource": "true"
+                            }
+                        },
+                        effect=aws_iam.Effect.ALLOW,
+                        not_actions=None,
+                        not_principals=None,
+                        not_resources=None,
+                        principals=[
+                            aws_iam.ArnPrincipal(arn="arn:aws:iam::242593025403:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling"),
+                        ],
+                        resources=["*"]
+                    ),
+                ]
+            )
+        )
+
+    def add_asg(self):
         # AMI
         # https://github.com/aws/aws-cdk/blob/master/packages/%40aws-cdk/aws-ec2/test/example.images.lit.ts
         # ami = aws_ec2.MachineImage.latest_amazon_linux(
@@ -67,7 +145,7 @@ class AutoScalingGroupStack(core.Stack):
         # ami = aws_ec2.MachineImage.from_ssm_parameter("/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2")
         ami = aws_ec2.MachineImage.generic_linux(
             ami_map={
-                'us-east-1': 'ami-03395346c40423bd9'
+                'us-east-1': 'ami-0f7275afc60d2bb3d'
             })
 
         # read user-data
@@ -76,7 +154,7 @@ class AutoScalingGroupStack(core.Stack):
 
         # Auto Scaling Group
         # https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_autoscaling/AutoScalingGroup.html
-        aws_autoscaling.AutoScalingGroup(self, "asg-app",
+        self.auto_scaling_group = aws_autoscaling.AutoScalingGroup(self, "asg-app",
             auto_scaling_group_name=f"{self.project['prefix']}-asg-app",
             # tpye of instance
             instance_type=aws_ec2.InstanceType("t3.xlarge"),
@@ -90,28 +168,16 @@ class AutoScalingGroupStack(core.Stack):
             key_name=self.project['keypair'],
             role=self.role['app'],
             # ebs
-            block_devices=[
-                aws_autoscaling.BlockDevice(
-                    device_name="/dev/xvda",
-                    volume=aws_autoscaling.BlockDeviceVolume(
-                        virtual_name=None,
-                        ebs_device=aws_autoscaling.EbsDeviceProps(
-                            delete_on_termination=True,
-                            iops=None,
-                            volume_type=aws_autoscaling.EbsDeviceVolumeType.GP2,
-                            volume_size=20,
-                            snapshot_id=None
-                        )
-                    )
-                )
-            ],
+            block_devices=None,
             # user-data
-            user_data=aws_ec2.UserData.custom(userdata),
+            user_data=None,
+            # user_data=aws_ec2.UserData.custom(userdata),
             # asg options
             desired_capacity=2,
             min_capacity=2,
             max_capacity=20,
-            health_check=aws_autoscaling.HealthCheck.elb(grace=core.Duration.seconds(120)),
+            # health_check=aws_autoscaling.HealthCheck.ec2(grace=core.Duration.seconds(180)),
+            health_check=aws_autoscaling.HealthCheck.elb(grace=core.Duration.seconds(180)),
             cooldown=core.Duration.seconds(300),
             group_metrics=None,
             ignore_unmodified_size_properties=None,
@@ -127,6 +193,9 @@ class AutoScalingGroupStack(core.Stack):
             spot_price=None,
             update_policy=None,
             update_type=None,
-        ).attach_to_application_target_group(
+        )
+    
+    def attach_target_group(self):
+        self.auto_scaling_group.attach_to_application_target_group(
             target_group=self.target_group['app']
         )
