@@ -18,6 +18,7 @@ from cloudfront.cloudfront_stack import CloudFrontStack
 from rds.rds_stack import RdsStack
 from elasticache.elasticache_stack import ElasticacheStack
 from efs.efs_stack import EfsStack
+from nacl.nacl_stack import NaclStack
 
 # Information of project
 project = dict()
@@ -98,6 +99,13 @@ cloudfront_stack = CloudFrontStack(
     elb            = elb_stack.elb,
     env            = cdk_environment
 ).add_dependency(elb_stack)
+
+nacl_stack = NaclStack(
+    scope          = app,
+    construct_id   = f"{project['prefix']}-nacl",
+    project        = project,
+    vpc            = vpc_stack.vpc,
+    env            = cdk_environment)
 
 # app synth -> cloudformation template
 app.synth()
