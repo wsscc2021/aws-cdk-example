@@ -40,11 +40,12 @@ class VpcStack(core.Stack):
     def add_vpc_endpoint(self):
         # vpc endpoint
         # Gateway
-        vpc_endpoint = aws_ec2.GatewayVpcEndpoint(self, "vpc-endpoint-s3-gateway",
+        self.vpc_endpoint = dict()
+        self.vpc_endpoint['s3gateway'] = aws_ec2.GatewayVpcEndpoint(self, "vpc-endpoint-s3-gateway",
             vpc=self.vpc,
             # https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_ec2/InterfaceVpcEndpointAwsService.html
             service=aws_ec2.GatewayVpcEndpointAwsService.S3,
             subnets=self.vpc.private_subnets)
-        core.Tags.of(vpc_endpoint).add(
+        core.Tags.of(self.vpc_endpoint['s3gateway']).add(
             "Name",
             f"{self.project['prefix']}-s3gateway-vpce")
