@@ -35,7 +35,7 @@ class VpcStack(core.Stack):
             ]
         )
 
-        # vpc_endpoint
+        self.vpc.add_flow_log(id=f"{project['prefix']}-vpc-flow-log")
         # self.add_vpc_endpoint()
 
     def add_vpc_endpoint(self):
