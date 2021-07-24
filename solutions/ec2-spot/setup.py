@@ -19,11 +19,11 @@ setuptools.setup(
     packages=setuptools.find_packages(where="."),
 
     install_requires=[
-        "aws-cdk.core==1.100.0",
-        "aws-cdk.aws_iam==1.100.0",
-        "aws-cdk.aws_ec2==1.100.0",
-        "aws-cdk.aws_elasticloadbalancingv2==1.100.0",
-        "aws-cdk.aws_lambda==1.100.0",
+        "aws-cdk.core==1.115.0",
+        "aws-cdk.aws_iam==1.115.0",
+        "aws-cdk.aws_ec2==1.115.0",
+        "aws-cdk.aws_elasticloadbalancingv2==1.115.0",
+        "aws-cdk.aws_lambda==1.115.0",
     ],
 
     python_requires=">=3.6",
