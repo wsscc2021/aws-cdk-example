@@ -1,14 +1,12 @@
 '''
     Dependency: vpc, security-group
 '''
-from aws_cdk import (
-    core, aws_ec2, aws_iam, aws_kms, aws_elasticache
-)
+from constructs import Construct
+from aws_cdk import Stack, Duration, RemovalPolicy, aws_ec2, aws_iam, aws_kms, aws_elasticache
 
-class ElasticacheStack(core.Stack):
-    def __init__(self, scope: core.Construct, construct_id: str, project: dict, vpc, security_group, **kwargs) -> None:
+class ElasticacheStack(Stack):
+    def __init__(self, scope: Construct, construct_id: str, project: dict, vpc, security_group, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
-
         # Init
         self.vpc = vpc
         self.project = project
@@ -23,16 +21,16 @@ class ElasticacheStack(core.Stack):
             subnet_ids=[ subnet.subnet_id for subnet in self.vpc.isolated_subnets ]
         )
 
-        # kms cmk
+        # kms
         self.kms_key['redis'] = aws_kms.Key(self, "kms-redis",
-            alias                    = f"alias/{project['prefix']}-redis",
-            description              = "",
-            admins                   = None,
-            enabled                  = True,
-            enable_key_rotation      = True,
-            pending_window           = core.Duration.days(7),
-            removal_policy           = core.RemovalPolicy.DESTROY,
-            policy                   = aws_iam.PolicyDocument(
+            alias               = f"alias/{project['prefix']}-redis",
+            description         = "",
+            admins              = None,
+            enabled             = True,
+            enable_key_rotation = True,
+            pending_window      = Duration.days(7),
+            removal_policy      = RemovalPolicy.DESTROY,
+            policy              = aws_iam.PolicyDocument(
                 statements=[
                     aws_iam.PolicyStatement(
                         sid="Enable IAM User Permission",

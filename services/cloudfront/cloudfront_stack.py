@@ -10,20 +10,18 @@
             }
         }
 '''
-from aws_cdk import (
-    core, aws_cloudfront, aws_cloudfront_origins, aws_certificatemanager
-)
+from constructs import Construct
+from aws_cdk import Stack, aws_cloudfront, aws_cloudfront_origins, aws_certificatemanager
 
-class CloudFrontStack(core.Stack):
-
-    def __init__(self, scope: core.Construct, construct_id: str, project: dict, origin, **kwargs) -> None:
+class CloudFrontStack(Stack):
+    def __init__(self, scope: Construct, construct_id: str, project: dict, origin, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
-        
-        # initial
+        # Init
         self.project = project
         self.origin = origin
         
-        # cache policy
+        # Cache policy
+        # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_cloudfront/CachePolicy.html
         cache_policy = aws_cloudfront.CachePolicy(self, "cloudfront-cache-policy",
             cache_policy_name="cloudfront-cache-policy",
             comment="",
@@ -36,7 +34,8 @@ class CloudFrontStack(core.Stack):
             enable_accept_encoding_brotli=True,
             enable_accept_encoding_gzip=True)
 
-        # origin request policy
+        # Origin request policy
+        # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_cloudfront/OriginRequestPolicy.html
         origin_request_policy = aws_cloudfront.OriginRequestPolicy(self, "cloudfront-origin-request-policy",
             origin_request_policy_name="cloudfront-origin-request-policy",
             comment="",
@@ -44,7 +43,8 @@ class CloudFrontStack(core.Stack):
             header_behavior=aws_cloudfront.OriginRequestHeaderBehavior.all(),
             query_string_behavior=aws_cloudfront.OriginRequestQueryStringBehavior.all())
 
-        # distribution
+        # Distribution
+        # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_cloudfront/Distribution.html
         aws_cloudfront.Distribution(self, "cloudfront",
             default_behavior=aws_cloudfront.BehaviorOptions(
                 origin=aws_cloudfront_origins.S3Origin(

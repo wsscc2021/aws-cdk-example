@@ -1,21 +1,16 @@
 '''
     Dependency: vpc, security_group
-    긁적;; Launch_Template을 쓸떄가 없다니... 일단 저장해두니 나중에 쓸일 있으면 쓰세요~
 '''
-from aws_cdk import (
-    core, aws_iam, aws_ec2
-)
+from constructs import Construct
+from aws_cdk import Stack, aws_iam, aws_ec2
 
-class LaunchTemplateStack(core.Stack):
-
-    def __init__(self, scope: core.Construct, construct_id: str, project: dict, vpc, security_group, **kwargs) -> None:
+class LaunchTemplateStack(Stack):
+    def __init__(self, scope: Construct, construct_id: str, project: dict, vpc, security_group, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
-
-        # Initial
+        # Init
         self.project        = project
         self.vpc            = vpc
         self.security_group = security_group
-
         # AMI
         # https://github.com/aws/aws-cdk/blob/master/packages/%40aws-cdk/aws-ec2/test/example.images.lit.ts
         ami = aws_ec2.MachineImage.latest_amazon_linux(
@@ -30,11 +25,9 @@ class LaunchTemplateStack(core.Stack):
         #         'us-east-1': 'ami-97785bed',
         #         'eu-west-1': 'ami-12345678',
         #     })
-
-        # read user-data
+        # user-data
         # with open("./ec2/userdata.sh") as f:
         #     userdata = f.read()
-
         # LaunchTemplate
         # https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_ec2/LaunchTemplate.html
         self.launch_template = dict()

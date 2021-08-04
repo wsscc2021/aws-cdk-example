@@ -1,14 +1,12 @@
 '''
     Dependency: vpc, security-group
 '''
-from aws_cdk import (
-    core, aws_iam, aws_kms, aws_ec2, aws_logs, aws_rds
-)
+from constructs import Construct
+from aws_cdk import Stack, Duration, RemovalPolicy, aws_iam, aws_kms, aws_ec2, aws_logs, aws_rds
 
-class RdsStack(core.Stack):
-    def __init__(self, scope: core.Construct, construct_id: str, project: dict, vpc, security_group, **kwargs) -> None:
+class RdsStack(Stack):
+    def __init__(self, scope: Construct, construct_id: str, project: dict, vpc, security_group, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
-
         # Init
         self.vpc = vpc
         self.project = project
@@ -22,14 +20,13 @@ class RdsStack(core.Stack):
             description="vpc's description",
             vpc=self.vpc,
             vpc_subnets=aws_ec2.SubnetSelection(subnet_type=aws_ec2.SubnetType.ISOLATED),
-            removal_policy=core.RemovalPolicy.DESTROY)
+            removal_policy=RemovalPolicy.DESTROY)
         
-        # IAM Role for cloudwatch to monitoring and logging
+        # IAM role for cloudwatch to monitoring and logging
         self.role['monitoring'] = aws_iam.Role(self, "rds-monitoring-role",
             role_name   = f"{project['prefix']}-role-rds-monitoring",
             description = "",
             assumed_by  = aws_iam.ServicePrincipal("monitoring.rds.amazonaws.com"),
-            external_id=None,
             external_ids=None,
             inline_policies=None,
             max_session_duration=None,
@@ -42,14 +39,14 @@ class RdsStack(core.Stack):
         
         # kms
         self.kms_key['rds'] = aws_kms.Key(self, "cmk-rds",
-            alias                    = f"alias/{project['prefix']}-rds",
-            description              = "",
-            admins                   = None,
-            enabled                  = True,
-            enable_key_rotation      = True,
-            pending_window           = core.Duration.days(7),
-            removal_policy           = core.RemovalPolicy.DESTROY,
-            policy                   = aws_iam.PolicyDocument(
+            alias               = f"alias/{project['prefix']}-rds",
+            description         = "",
+            admins              = None,
+            enabled             = True,
+            enable_key_rotation = True,
+            pending_window      = Duration.days(7),
+            removal_policy      = RemovalPolicy.DESTROY,
+            policy              = aws_iam.PolicyDocument(
                 statements=[
                     aws_iam.PolicyStatement(
                         sid="Enable IAM User Permission",
@@ -71,10 +68,10 @@ class RdsStack(core.Stack):
         )
 
         # database
-        # self.add_aurora_mysql()
-        # self.add_aurora_postgres()
+        self.add_aurora_mysql()
+        self.add_aurora_postgres()
         self.add_mysql()
-        # self.add_postgres()
+        self.add_postgres()
     
     def add_aurora_mysql(self):
         # Parameter group
@@ -124,10 +121,10 @@ class RdsStack(core.Stack):
             cloudwatch_logs_exports=["audit","error","slowquery"], # ["audit","error","general","slowquery"]
             cloudwatch_logs_retention=aws_logs.RetentionDays.TWO_WEEKS,
             cloudwatch_logs_retention_role=None, # Default, created new role
-            monitoring_interval=core.Duration.seconds(60), # default, no enhanced monitoring
+            monitoring_interval=Duration.seconds(60), # default, no enhanced monitoring
             monitoring_role=self.role['monitoring'],
             preferred_maintenance_window=None,
-            removal_policy=core.RemovalPolicy.DESTROY,
+            removal_policy=RemovalPolicy.DESTROY,
             s3_export_buckets=None, # default none
             s3_export_role=None, # default none
             s3_import_buckets=None, # default none
@@ -183,10 +180,10 @@ class RdsStack(core.Stack):
             cloudwatch_logs_exports=["postgresql"], # ["postgresql"]
             cloudwatch_logs_retention=aws_logs.RetentionDays.TWO_WEEKS,
             cloudwatch_logs_retention_role=None, # Default, created new role
-            monitoring_interval=core.Duration.seconds(60), # default, no enhanced monitoring
+            monitoring_interval=Duration.seconds(60), # default, no enhanced monitoring
             monitoring_role=self.role['monitoring'],
             preferred_maintenance_window=None,
-            removal_policy=core.RemovalPolicy.DESTROY,
+            removal_policy=RemovalPolicy.DESTROY,
             s3_export_buckets=None, # default none
             s3_export_role=None, # default none
             s3_import_buckets=None, # default none
@@ -224,7 +221,6 @@ class RdsStack(core.Stack):
             availability_zone=None,
             port=3306,
             subnet_group=self.subnet_group,
-            vpc_placement=None,
             vpc_subnets=None,
             publicly_accessible=False,
             security_groups=[self.security_group['example']],
@@ -234,7 +230,7 @@ class RdsStack(core.Stack):
             domain=None, # kerberos authentication
             domain_role=None,
             # monitoring and logging
-            monitoring_interval=core.Duration.seconds(60),
+            monitoring_interval=Duration.seconds(60),
             monitoring_role=self.role['monitoring'],
             enable_performance_insights=None,
             performance_insight_encryption_key=None,
@@ -246,7 +242,7 @@ class RdsStack(core.Stack):
             database_name="example",
             parameter_group=parameter_group,
             option_group=None,
-            removal_policy=core.RemovalPolicy.DESTROY,
+            removal_policy=RemovalPolicy.DESTROY,
             deletion_protection=False,
             character_set_name=None,
             timezone=None,
@@ -285,7 +281,6 @@ class RdsStack(core.Stack):
         #     availability_zone=None,
         #     port=3306,
         #     subnet_group=self.subnet_group,
-        #     vpc_placement=None,
         #     vpc_subnets=None,
         #     publicly_accessible=False,
         #     security_groups=[self.security_group['example']],
@@ -294,7 +289,7 @@ class RdsStack(core.Stack):
         #     domain=None, # kerberos authentication
         #     domain_role=None,
         #     # monitoring and logging
-        #     monitoring_interval=core.Duration.seconds(60),
+        #     monitoring_interval=Duration.seconds(60),
         #     monitoring_role=self.role['monitoring'],
         #     enable_performance_insights=None,
         #     performance_insight_encryption_key=None,
@@ -303,7 +298,7 @@ class RdsStack(core.Stack):
         #     cloudwatch_logs_retention=aws_logs.RetentionDays.TWO_WEEKS,
         #     cloudwatch_logs_retention_role=None, # Default, create new role
         #     # Advanced
-        #     removal_policy=core.RemovalPolicy.DESTROY,
+        #     removal_policy=RemovalPolicy.DESTROY,
         #     deletion_protection=False,
         #     processor_features=None,
         #     s3_export_buckets=None,
@@ -350,7 +345,6 @@ class RdsStack(core.Stack):
             availability_zone=None,
             port=5432,
             subnet_group=self.subnet_group,
-            vpc_placement=None,
             vpc_subnets=None,
             publicly_accessible=False,
             security_groups=[self.security_group['example']],
@@ -360,7 +354,7 @@ class RdsStack(core.Stack):
             domain=None, # kerberos authentication
             domain_role=None,
             # monitoring and logging
-            monitoring_interval=core.Duration.seconds(60),
+            monitoring_interval=Duration.seconds(60),
             monitoring_role=self.role['monitoring'],
             enable_performance_insights=None,
             performance_insight_encryption_key=None,
@@ -372,7 +366,7 @@ class RdsStack(core.Stack):
             database_name="example",
             parameter_group=parameter_group,
             option_group=None,
-            removal_policy=core.RemovalPolicy.DESTROY,
+            removal_policy=RemovalPolicy.DESTROY,
             deletion_protection=False,
             character_set_name=None,
             timezone=None,

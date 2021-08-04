@@ -1,23 +1,21 @@
 '''
     Dependency: vpc, security_group
 '''
-from aws_cdk import (
-    core, aws_ec2, aws_iam, aws_kms, aws_eks
-)
+from constructs import Construct
+from aws_cdk import Stack, Duration, RemovalPolicy, Tags, aws_ec2, aws_iam, aws_kms, aws_eks
 import json
 
-class EksStack(core.Stack):
-    def __init__(self, scope: core.Construct, construct_id: str, project: dict, vpc, security_group: dict, **kwargs) -> None:
+class EksStack(Stack):
+    def __init__(self, scope: Construct, construct_id: str, project: dict, vpc, security_group: dict, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
-        
-        # init
+        # Init
         self.vpc            = vpc
         self.project        = project
         self.security_group = security_group
-
-        # create resource
-        # EKS Cluster는 생성되는 데 오랜 시간이 소모됩니다. Rollback 시간을 줄이려면 순차적으로 하나씩 생성해야합니다. 
-        self.create_security_group() # 원래는 security_group_stack에서 생성해야합니다.
+        # Create resource
+        # It needs a long time about 30~60 minutes to is created EKS cluster
+        # Therefore, It important that create in turn resource each in order to that can easier and faster rollback
+        self.create_security_group() # Demostration code, recommend creating from security_group_stack
         self.create_kms()
         self.create_iam()
         self.create_eks_cluster()
@@ -36,8 +34,8 @@ class EksStack(core.Stack):
             admins                   = None,
             enabled                  = True,
             enable_key_rotation      = True,
-            pending_window           = core.Duration.days(7),
-            removal_policy           = core.RemovalPolicy.DESTROY,
+            pending_window           = Duration.days(7),
+            removal_policy           = RemovalPolicy.DESTROY,
             policy                   = aws_iam.PolicyDocument(
                 statements=[
                     aws_iam.PolicyStatement(
@@ -62,13 +60,14 @@ class EksStack(core.Stack):
         )
 
     def create_iam(self):
-        # IAM Role for EKS
+        # IAM role
+        # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_iam/Role.html
         self.role = dict()
         # Existing role
         self.role['admin'] = aws_iam.Role.from_role_arn(self, "role-admin",
             role_arn="arn:aws:iam::242593025403:role/AdministratorRole",
             mutable=True)
-        # Create Role
+        # Create role
         self.role['eks-cluster'] = aws_iam.Role(self, "role-eks-cluster",
             role_name   = f"{self.project['prefix']}-role-eks-cluster",
             description = "",
@@ -87,8 +86,8 @@ class EksStack(core.Stack):
             ])
 
     def create_eks_cluster(self):
-        # EkS Cluster
-        # https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_eks/Cluster.html
+        # EkS cluster
+        # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_eks/Cluster.html
         self.eks_cluster = aws_eks.Cluster(self, "eks-cluster",
             default_capacity=0,
             # default_capacity_instance=None,
@@ -101,7 +100,7 @@ class EksStack(core.Stack):
             # kubectl_memory=None,
             masters_role=self.role['admin'],
             output_masters_role_arn=True,
-            # place_cluster_handler_in_vpc=None,
+            # place_cluster_handler_in_vpc=None,xxxxxxxxxxxxxxxxxxxxxxx
             # prune=None,
             secrets_encryption_key=self.kms_key['eks-cluster'],
             version=aws_eks.KubernetesVersion.V1_19,
@@ -133,7 +132,7 @@ class EksStack(core.Stack):
             ],
             instance_type=aws_ec2.InstanceType("t3.xlarge"),
             key_name=self.project['keypair'],
-            launch_template_name=f"{self.project['prefix']}-lt-nodegroup-core",
+            launch_template_name=f"{self.project['prefix']}-nodegroup-core-lt",
             security_group=self.security_group['eks-nodegroup'])
         
     def create_nodegroup(self):
@@ -167,7 +166,7 @@ class EksStack(core.Stack):
 
     def create_service_account(self):
         # service account
-        # https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_eks/ServiceAccount.html
+        # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_eks/ServiceAccount.html
         self.service_account = dict()
         self.add_service_account(
             name        = "aws-load-balancer-controller",
@@ -204,7 +203,7 @@ class EksStack(core.Stack):
 
     def add_service_account(self, name, namespace, policy_file=None, managed_policies=[]):
         # service account
-        # https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_eks/ServiceAccount.html
+        # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_eks/ServiceAccount.html
         self.service_account[name] = aws_eks.ServiceAccount(
             self, f"sa-{name}",
             cluster=self.eks_cluster,
@@ -221,7 +220,7 @@ class EksStack(core.Stack):
 
     def install_helm_chart(self):
         # Helm chart into EkS Cluster
-        # https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_eks/Cluster.html
+        # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_eks/Cluster.html
         self.eks_cluster.add_helm_chart(
             "helm-aws-load-balancer-controller",
             repository="https://aws.github.io/eks-charts",
@@ -262,7 +261,6 @@ class EksStack(core.Stack):
             },
             timeout=None,
             wait=None)
-        
         self.eks_cluster.add_helm_chart(
             "helm-external-dns",
             repository="https://charts.bitnami.com/bitnami",
@@ -279,7 +277,6 @@ class EksStack(core.Stack):
             },
             timeout=None,
             wait=None)
-
         self.eks_cluster.add_helm_chart(
             "helm-aws-cloudwatch-metrics",
             repository="https://aws.github.io/eks-charts",
@@ -297,7 +294,6 @@ class EksStack(core.Stack):
             },
             timeout=None,
             wait=None)
-        
         self.eks_cluster.add_helm_chart(
             "helm-appmesh-controller",
             repository="https://aws.github.io/eks-charts",
@@ -329,7 +325,6 @@ class EksStack(core.Stack):
             name = "eks-nodegroup",
             description = "",
             allow_all_outbound = True)
-        
         # eks-cluster-controlplane
         self.security_group['eks-cluster-controlplane'].add_ingress_rule(
             peer = self.security_group['eks-nodegroup'],
@@ -347,7 +342,6 @@ class EksStack(core.Stack):
                 from_port=1025,
                 to_port=65535),
             description = "")
-        
         # eks nodegroup
         self.security_group['eks-nodegroup'].add_ingress_rule(
             peer = self.security_group['eks-nodegroup'],
@@ -377,9 +371,9 @@ class EksStack(core.Stack):
     def add_security_group(self, name: str, description: str, allow_all_outbound: bool):
         self.security_group[name] = aws_ec2.SecurityGroup(self, name,
             vpc                 = self.vpc,
-            security_group_name = f"{self.project['prefix']}-sg-{name}",
+            security_group_name = f"{self.project['prefix']}-{name}-sg",
             description         = description,
             allow_all_outbound  = allow_all_outbound)
-        core.Tags.of(self.security_group[name]).add(
+        Tags.of(self.security_group[name]).add(
             "Name",
-            f"{self.project['prefix']}-sg-{name}")
+            f"{self.project['prefix']}-{name}-sg")

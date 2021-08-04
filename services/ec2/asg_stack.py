@@ -1,32 +1,28 @@
 '''
     Dependency: vpc, security_group, elb
 '''
-from aws_cdk import (
-    core, aws_iam, aws_ec2, aws_autoscaling
-)
+from constructs import Construct
+from aws_cdk import Stack, Duration, Tags, aws_iam, aws_ec2, aws_autoscaling
 
-class AutoScalingGroupStack(core.Stack):
-
-    def __init__(self, scope: core.Construct, construct_id: str, project: dict, vpc, security_group, target_group, **kwargs) -> None:
+class AutoScalingGroupStack(Stack):
+    def __init__(self, scope: Construct, construct_id: str, project: dict, vpc, security_group, target_group, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
-
-        # Initial
+        # Init
         self.project        = project
         self.vpc            = vpc
         self.security_group = security_group
         self.target_group   = target_group
-        self.create_security_group() # 원래는 security-group stack에서 생성함
-
-        # Create Role
+        self.create_security_group() # Demostration code, Recommend create from security_group stack
+        # IAM role
+        # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_iam/Role.html
         self.role = dict()
-        self.role['foo-app'] = aws_iam.Role(self, "role-foo-app",
-            role_name   = f"{self.project['prefix']}-role-foo-app",
+        self.role['foo-app'] = aws_iam.Role(self, "foo-app-role",
+            role_name   = f"{self.project['prefix']}-foo-app-role",
             description = "",
             assumed_by  = aws_iam.ServicePrincipal("ec2.amazonaws.com"),
             managed_policies=[
                 aws_iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AmazonEC2RoleforSSM")
             ])
-
         # AMI
         # https://github.com/aws/aws-cdk/blob/master/packages/%40aws-cdk/aws-ec2/test/example.images.lit.ts
         ami = aws_ec2.MachineImage.latest_amazon_linux(
@@ -41,15 +37,13 @@ class AutoScalingGroupStack(core.Stack):
         #         'us-east-1': 'ami-97785bed',
         #         'eu-west-1': 'ami-12345678',
         #     })
-
-        # read user-data
+        # user-data
         with open("./ec2/userdata.sh") as f:
             userdata = f.read()
-
         # Auto Scaling Group
-        # https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_autoscaling/AutoScalingGroup.html
-        aws_autoscaling.AutoScalingGroup(self, "asg-foo-app",
-            auto_scaling_group_name=f"{self.project['prefix']}-asg-foo-app",
+        # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_autoscaling/AutoScalingGroup.html
+        aws_autoscaling.AutoScalingGroup(self, "foo-app-asg",
+            auto_scaling_group_name=f"{self.project['prefix']}-foo-app-asg",
             # tpye of instance
             instance_type=aws_ec2.InstanceType("t3.xlarge"),
             machine_image=ami,
@@ -83,34 +77,27 @@ class AutoScalingGroupStack(core.Stack):
             desired_capacity=2,
             min_capacity=2,
             max_capacity=20,
-            health_check=aws_autoscaling.HealthCheck.elb(grace=core.Duration.seconds(120)),
-            cooldown=core.Duration.seconds(300),
+            health_check=aws_autoscaling.HealthCheck.elb(grace=Duration.seconds(120)),
+            cooldown=Duration.seconds(300),
             group_metrics=None,
             ignore_unmodified_size_properties=None,
             instance_monitoring=None,
             max_instance_lifetime=None,
             notifications=None,
-            notifications_topic=None,
-            replacing_update_min_successful_instances_percent=None,
-            resource_signal_count=None,
-            resource_signal_timeout=None,
-            rolling_update_configuration=None,
             signals=None,
             spot_price=None,
             update_policy=None,
-            update_type=None,
         ).attach_to_application_target_group(
             target_group=self.target_group['foo-app']
         )
 
-
     def create_security_group(self):
-        # 원래는 security group stack에서 별도로 생성해줍시다!
-        self.security_group['foo-app'] = aws_ec2.SecurityGroup(self, 'sg-foo-app',
+        # Demostration code, Recommend create from security_group stack.
+        self.security_group['foo-app'] = aws_ec2.SecurityGroup(self, 'foo-app-sg',
             vpc                 = self.vpc,
-            security_group_name = f"{self.project['prefix']}-sg-foo-app",
+            security_group_name = f"{self.project['prefix']}-foo-app-sg",
             description         = "",
             allow_all_outbound  = True)
-        core.Tags.of(self.security_group['foo-app']).add(
+        Tags.of(self.security_group['foo-app']).add(
             "Name",
-            f"{self.project['prefix']}-sg-foo-app")
+            f"{self.project['prefix']}-foo-app-sg")

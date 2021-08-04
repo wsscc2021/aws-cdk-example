@@ -1,22 +1,19 @@
 '''
     Dependency: None
-    IAM Role은 Corss Reference 시에 Circular Dependency 문제가 자주 생기기 떄문에
-    되도록이면 적용할 서비스 스택에서 생성해주는 것이 좋습니다.
+    If you will create IAM role object, you must create it in each service stack that using role.
+    Otherwise it occur error of circular dependency.
 '''
-from aws_cdk import (
-    core, aws_iam
-)
+from constructs import Construct
+from aws_cdk import Stack, aws_iam
 
-class IamStack(core.Stack):
-
-    def __init__(self, scope: core.Construct, construct_id: str, project: dict, **kwargs) -> None:
+class IamStack(Stack):
+    def __init__(self, scope: Construct, construct_id: str, project: dict, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
-        
         # initial
         self.policy = dict()
         self.role = dict()
-
         # AWS Custom Policy
+        # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_iam/ManagedPolicy.html
         self.policy["sample"] = aws_iam.ManagedPolicy(self, "policy-sample",
             managed_policy_name = f"{project['prefix']}-policy-sample",
             description         = "",
@@ -48,13 +45,13 @@ class IamStack(core.Stack):
                 )
             ]
         )
-
         # Existing Role
+        # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_iam/Role.html
         self.role['team'] = aws_iam.Role.from_role_arn(self, "team",
             role_arn="arn:aws:iam::242593025403:role/AdministratorRole",
             mutable=True)
-        
         # AWS Custom Role
+        # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_iam/Role.html
         self.role['foo-app'] = aws_iam.Role(self, "foo-app",
             role_name   = f"{project['prefix']}-role-foo-app",
             description = "",
@@ -101,11 +98,9 @@ class IamStack(core.Stack):
             # permissions_boundary=None,
             # managed_policies=[]
         )
-
         # Attach AWS Managed Policy
         self.role['foo-app'].add_managed_policy(
             aws_iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AmazonEC2RoleforSSM"))
-        
         # Attach Custom Managed Policy
         self.role['foo-app'].add_managed_policy(
             self.policy['sample'])

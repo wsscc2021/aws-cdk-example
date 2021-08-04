@@ -1,14 +1,12 @@
 '''
     Dependency: vpc, security-group
 '''
-from aws_cdk import (
-    core, aws_ec2, aws_iam, aws_kms, aws_efs
-)
+from constructs import Construct
+from aws_cdk import Stack, Duration, RemovalPolicy, aws_ec2, aws_iam, aws_kms, aws_efs
 
-class EfsStack(core.Stack):
-    def __init__(self, scope: core.Construct, construct_id: str, project: dict, vpc, security_group, **kwargs) -> None:
+class EfsStack(Stack):
+    def __init__(self, scope: Construct, construct_id: str, project: dict, vpc, security_group, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
-
         # Init
         self.vpc = vpc
         self.project = project
@@ -18,14 +16,14 @@ class EfsStack(core.Stack):
 
         # kms
         self.kms_key['efs'] = aws_kms.Key(self, "efs_cmk",
-            alias                    = f"alias/{project['prefix']}-efs",
-            description              = "",
-            admins                   = None,
-            enabled                  = True,
-            enable_key_rotation      = True,
-            pending_window           = core.Duration.days(7),
-            removal_policy           = core.RemovalPolicy.DESTROY,
-            policy                   = aws_iam.PolicyDocument(
+            alias               = f"alias/{project['prefix']}-efs",
+            description         = "",
+            admins              = None,
+            enabled             = True,
+            enable_key_rotation = True,
+            pending_window      = Duration.days(7),
+            removal_policy      = RemovalPolicy.DESTROY,
+            policy              = aws_iam.PolicyDocument(
                 statements=[
                     aws_iam.PolicyStatement(
                         sid="Enable IAM User Permission",
@@ -57,7 +55,7 @@ class EfsStack(core.Stack):
             performance_mode=aws_efs.PerformanceMode.GENERAL_PURPOSE,
             throughput_mode=aws_efs.ThroughputMode.BURSTING,
             provisioned_throughput_per_second=None,
-            removal_policy=core.RemovalPolicy.DESTROY,
+            removal_policy=RemovalPolicy.DESTROY,
             security_group=self.security_group['example'],
             vpc_subnets=aws_ec2.SubnetSelection(subnet_type=aws_ec2.SubnetType.ISOLATED)
         )

@@ -1,19 +1,17 @@
 '''
     Dependency: None
 '''
-from aws_cdk import (
-    core, aws_iam, aws_lambda
-)
+from constructs import Construct
+from aws_cdk import Stack, aws_iam, aws_lambda
 
-class LambdaStack(core.Stack):
-    def __init__(self, scope: core.Construct, construct_id: str, project: dict, **kwargs) -> None:
+class LambdaStack(Stack):
+    def __init__(self, scope: Construct, construct_id: str, project: dict, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
-
         # Init
         self.project = project
         self.role = dict()
-        
-        # IAM
+        # IAM role
+        # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_iam/Role.html
         self.role['functionA'] = aws_iam.Role(self, "functionA-role",
             role_name   = f"{project['prefix']}-role-lambda-functionA",
             description = "",
@@ -31,11 +29,11 @@ class LambdaStack(core.Stack):
                 aws_iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole")
             ]
         )
-
         # Functions
+        # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_lambda/Function.html
         functionA = aws_lambda.Function(self, "lambda-functionA",
             function_name=f"{self.project['prefix']}-lambda-functionA",
-            code=aws_lambda.Code.asset("./lambda_/source"),
+            code=aws_lambda.Code.from_asset("./lambda_/source"),
             handler="index.handler",
             runtime=aws_lambda.Runtime.NODEJS_14_X,
             role=self.role['functionA'],
@@ -59,7 +57,6 @@ class LambdaStack(core.Stack):
             profiling=None,
             profiling_group=None,
             reserved_concurrent_executions=None,
-            security_group=None,
             security_groups=None,
             timeout=None,
             tracing=None,

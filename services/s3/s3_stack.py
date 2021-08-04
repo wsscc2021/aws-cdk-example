@@ -1,28 +1,26 @@
 '''
     Dependency: None
 '''
-from aws_cdk import (
-    core, aws_kms, aws_iam, aws_s3
-)
+from constructs import Construct
+from aws_cdk import Stack, Duration, RemovalPolicy, aws_iam, aws_kms, aws_s3
 
-class S3Stack(core.Stack):
-    def __init__(self, scope: core.Construct, construct_id: str, project: dict, **kwargs) -> None:
+class S3Stack(Stack):
+    def __init__(self, scope: Construct, construct_id: str, project: dict, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
-
         # Init
         self.project = project
         self.kms_key = dict()
         self.s3_bucket = dict()
-
         # KMS
+        # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_kms/Key.html
         self.kms_key['s3-bucket'] = aws_kms.Key(self, "kms-s3-bucket",
             alias                    = f"alias/{project['prefix']}-s3-bucket",
             description              = "",
             admins                   = None,
             enabled                  = True,
             enable_key_rotation      = True,
-            pending_window           = core.Duration.days(7),
-            removal_policy           = core.RemovalPolicy.DESTROY,
+            pending_window           = Duration.days(7),
+            removal_policy           = RemovalPolicy.DESTROY,
             policy                   = aws_iam.PolicyDocument(
                 statements=[
                     aws_iam.PolicyStatement(
@@ -43,9 +41,8 @@ class S3Stack(core.Stack):
                 ]
             )
         )
-
-
-        # Bucket
+        # S3 bucket
+        # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_s3/Bucket.html
         self.s3_bucket['sample'] = aws_s3.Bucket(self, "bucket-sample",
             bucket_name="useast1-sample-bucket-as1nkaozosw",
             access_control=aws_s3.BucketAccessControl.PRIVATE,
@@ -71,10 +68,9 @@ class S3Stack(core.Stack):
             website_index_document=None,
             website_redirect=None,
             website_routing_rules=None,
-            removal_policy=core.RemovalPolicy.DESTROY,
+            removal_policy=RemovalPolicy.DESTROY,
             auto_delete_objects=False,
         )
-
         # Bucket policy for vpc_endpoint 
         # self.s3_bucket['sample'].add_to_resource_policy(
         #     permission=aws_iam.PolicyStatement(
