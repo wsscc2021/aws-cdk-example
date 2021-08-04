@@ -6,10 +6,10 @@
 ## Services directory
 In this directory, it has service-level example constructs(stacks).  
 It has no dependency between themselve.  
-if it has dependency, must be written to description.
+If it has dependency, must be written to description.
 
 ## Solutions directory
-In this directory, it as solution-level example constructs(stacks).
+In this directory, it has solution-level example constructs(stacks).
 
 ## The way of using this example
 You must be prepared aws-cdk(CLI) version 2 and cdk bootstrap
