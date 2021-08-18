@@ -7,7 +7,7 @@
     4. cdk Construct
 '''
 # Import CDK modules
-from aws_cdk import core
+from aws_cdk import App, Environment
 
 # Import Services modules
 from vpc.vpc_stack import VpcStack
@@ -21,19 +21,19 @@ project['name']    = "cdkworkshop"
 project['prefix']  = f"{project['env']}-{project['name']}"
 
 # cdk environment
-cdk_environment = core.Environment(
+cdk_environment = Environment(
     account=project['account'],
     region=project['region'])
 
 # cdk construct
-app = core.App()
+app = App()
 
 # VPC
 vpc_stack = VpcStack(
     scope        = app,
     construct_id = f"{project['prefix']}",
-    project      = project,
-    env          = cdk_environment)
+    env          = cdk_environment,
+    project      = project)
 
 # app synth -> cloudformation template
 app.synth()
