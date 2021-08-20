@@ -25,6 +25,7 @@ from rds.rds_stack import RdsStack
 from efs.efs_stack import EfsStack
 from elasticache.elasticache_stack import ElasticacheStack
 from cloudfront.cloudfront_stack import CloudFrontStack
+from cicd.cicd_stack import CiCdStack
 
 # Information of project
 project = dict()
@@ -154,6 +155,14 @@ cloudfront_stack = CloudFrontStack(
         's3': s3_stack.s3_bucket,
         'elb': None,
     })
+
+cicd_stack = CiCdStack(
+    scope          = app,
+    env            = cdk_environment,
+    construct_id   = f"{project['prefix']}-cicd",
+    project        = project,
+    vpc            = vpc_stack.vpc,
+    security_group = security_group_stack.security_group)
 
 # app synth -> cloudformation template
 app.synth()
