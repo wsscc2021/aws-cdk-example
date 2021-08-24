@@ -367,7 +367,7 @@ class EksStack(Stack):
                 from_port=1025,
                 to_port=65535),
             description = "",)
-        self.security_group['eks-nodegroup'].add_ingress_rule(
+        self.security_group['eks-nodegroup'].add_egress_rule(
             peer = self.security_group['eks-nodegroup'],
             connection=aws_ec2.Port(
                 protocol=aws_ec2.Protocol.ALL,
@@ -376,18 +376,10 @@ class EksStack(Stack):
                 to_port=None),
             description = "",)
         self.security_group['eks-nodegroup'].add_egress_rule(
-            peer = self.security_group['eks-nodegroup'],
-            connection=aws_ec2.Port(
-                protocol=aws_ec2.Protocol.ALL,
-                string_representation="eks-nodegroup-5",
-                from_port=None,
-                to_port=None),
-            description = "",)
-        self.security_group['eks-nodegroup'].add_egress_rule(
             peer = aws_ec2.Peer.ipv4('0.0.0.0/0'),
             connection=aws_ec2.Port(
                 protocol=aws_ec2.Protocol.TCP,
-                string_representation="eks-nodegroup-6",
+                string_representation="eks-nodegroup-5",
                 from_port=443,
                 to_port=443),
             description = "",)
