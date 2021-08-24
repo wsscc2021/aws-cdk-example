@@ -70,7 +70,7 @@ class SecurityGroupStack(Stack):
     def add_security_group(self, name: str, description: str, allow_all_outbound: bool):
         self.security_group[name] = aws_ec2.SecurityGroup(self, name,
             vpc                 = self.vpc,
-            security_group_name = f"{self.project['prefix']}-sg-{name}",
+            security_group_name = f"{self.project['prefix']}-{name}-sg",
             description         = description,
             allow_all_outbound  = allow_all_outbound)
         Tags.of(self.security_group[name]).add(
