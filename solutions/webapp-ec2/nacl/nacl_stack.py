@@ -38,7 +38,7 @@ class NaclStack(core.Stack):
                 subnet_group_name=None,
                 subnet_name=None,
                 subnets=None,
-                subnet_type=aws_ec2.SubnetType.PRIVATE))
+                subnet_type=aws_ec2.SubnetType.PRIVATE_WITH_NAT))
         self.add_nacl(
             name='data',
             subnet_selection=aws_ec2.SubnetSelection(
@@ -48,7 +48,7 @@ class NaclStack(core.Stack):
                 subnet_group_name=None,
                 subnet_name=None,
                 subnets=None,
-                subnet_type=aws_ec2.SubnetType.ISOLATED))
+                subnet_type=aws_ec2.SubnetType.PRIVATE_ISOLATED))
         
         # Define NACL Rule
         # https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_ec2/NetworkAclEntry.html
