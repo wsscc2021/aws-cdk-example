@@ -101,7 +101,7 @@ class EC2InstanceStack(Stack):
             user_data=None,
             # user_data=aws_ec2.UserData.custom(userdata),
             user_data_causes_replacement=None,
-            vpc_subnets=aws_ec2.SubnetSelection(subnet_type=aws_ec2.SubnetType.PRIVATE))
+            vpc_subnets=aws_ec2.SubnetSelection(subnet_type=aws_ec2.SubnetType.PRIVATE_WITH_NAT))
 
     def create_security_group(self):
         # Demostration code, Recommend create from security_group stack.

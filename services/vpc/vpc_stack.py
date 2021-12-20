@@ -21,11 +21,11 @@ class VpcStack(Stack):
                     name="Public",
                     cidr_mask=20
                 ), aws_ec2.SubnetConfiguration(
-                    subnet_type=aws_ec2.SubnetType.PRIVATE,
+                    subnet_type=aws_ec2.SubnetType.PRIVATE_WITH_NAT,
                     name="Private",
                     cidr_mask=20
                 ), aws_ec2.SubnetConfiguration(
-                    subnet_type=aws_ec2.SubnetType.ISOLATED,
+                    subnet_type=aws_ec2.SubnetType.PRIVATE_ISOLATED,
                     name="Data",
                     cidr_mask=20
                 )
@@ -50,4 +50,4 @@ class VpcStack(Stack):
             open=None,
             private_dns_enabled=None,
             security_groups=None,
-            subnets=aws_ec2.SubnetSelection(subnet_type=aws_ec2.SubnetType.PRIVATE))
+            subnets=aws_ec2.SubnetSelection(subnet_type=aws_ec2.SubnetType.PRIVATE_WITH_NAT))

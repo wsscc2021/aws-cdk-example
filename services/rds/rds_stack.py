@@ -19,7 +19,7 @@ class RdsStack(Stack):
             subnet_group_name=f"{self.project['prefix']}-rds-subnetgroup",
             description="vpc's description",
             vpc=self.vpc,
-            vpc_subnets=aws_ec2.SubnetSelection(subnet_type=aws_ec2.SubnetType.ISOLATED),
+            vpc_subnets=aws_ec2.SubnetSelection(subnet_type=aws_ec2.SubnetType.PRIVATE_ISOLATED),
             removal_policy=RemovalPolicy.DESTROY)
         
         # IAM role for cloudwatch to monitoring and logging

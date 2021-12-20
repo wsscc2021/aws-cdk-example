@@ -51,7 +51,7 @@ class AutoScalingGroupStack(Stack):
             vpc=self.vpc,
             associate_public_ip_address=None,
             security_group=self.security_group['foo-app'],
-            vpc_subnets=aws_ec2.SubnetSelection(subnet_type=aws_ec2.SubnetType.PRIVATE),
+            vpc_subnets=aws_ec2.SubnetSelection(subnet_type=aws_ec2.SubnetType.PRIVATE_WITH_NAT),
             # advanced options
             key_name=self.project['keypair'],
             role=self.role['foo-app'],

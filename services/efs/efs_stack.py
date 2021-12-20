@@ -57,5 +57,5 @@ class EfsStack(Stack):
             provisioned_throughput_per_second=None,
             removal_policy=RemovalPolicy.DESTROY,
             security_group=self.security_group['example'],
-            vpc_subnets=aws_ec2.SubnetSelection(subnet_type=aws_ec2.SubnetType.ISOLATED)
+            vpc_subnets=aws_ec2.SubnetSelection(subnet_type=aws_ec2.SubnetType.PRIVATE_ISOLATED)
         )
