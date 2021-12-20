@@ -45,26 +45,7 @@ class RdsStack(Stack):
             enabled             = True,
             enable_key_rotation = True,
             pending_window      = Duration.days(7),
-            removal_policy      = RemovalPolicy.DESTROY,
-            policy              = aws_iam.PolicyDocument(
-                statements=[
-                    aws_iam.PolicyStatement(
-                        sid="Enable IAM User Permission",
-                        actions=[
-                            "kms:*"
-                        ],
-                        conditions=None,
-                        effect=aws_iam.Effect.ALLOW,
-                        not_actions=None,
-                        not_principals=None,
-                        not_resources=None,
-                        principals=[
-                            aws_iam.AccountRootPrincipal()
-                        ],
-                        resources=["*"]
-                    )
-                ]
-            )
+            removal_policy      = RemovalPolicy.DESTROY
         )
 
         # database
