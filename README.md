@@ -1,7 +1,7 @@
 
 ## Version information
-- aws-cdk@2.0.0-rc.15
-- python-3.8
+- aws-cdk@2.1.0
+- python>=3.6
 
 ## Services directory
 In this directory, it has service-level example constructs(stacks).  
