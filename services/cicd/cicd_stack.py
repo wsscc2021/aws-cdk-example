@@ -62,7 +62,7 @@ class CiCdStack(Stack):
                 subnet_filters=None,
                 subnet_group_name=None,
                 subnets=None,
-                subnet_type=aws_ec2.SubnetType.PRIVATE_WITH_NAT_WITH_NAT),
+                subnet_type=aws_ec2.SubnetType.PRIVATE_WITH_NAT),
             security_groups=[self.security_group["example"]],
             allow_all_outbound=None,
             timeout=None,
