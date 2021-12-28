@@ -13,11 +13,11 @@ class ElasticLoadBalancerStack(Stack):
         self.security_group = security_group
         self.target_group = dict()
         self.elb = dict()
-        self.create_security_group() # Demostration code, Recommend create from security_group stack
+        
         # Target Group
         # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_elasticloadbalancingv2/TargetGroupBase.html
         self.target_group['foo-app'] = aws_elasticloadbalancingv2.ApplicationTargetGroup(self, "tg-foo-app",
-            port=8080,
+            port=5000,
             protocol=aws_elasticloadbalancingv2.ApplicationProtocol.HTTP,
             protocol_version=aws_elasticloadbalancingv2.ApplicationProtocolVersion.HTTP1,
             slow_start=Duration.seconds(30),
@@ -33,11 +33,11 @@ class ElasticLoadBalancerStack(Stack):
                 unhealthy_threshold_count=2,
                 interval=Duration.seconds(10),
                 path="/healthcheck",
-                port="8080",
+                port="5000",
                 protocol=aws_elasticloadbalancingv2.Protocol.HTTP,
                 timeout=Duration.seconds(5)),
             target_group_name=f"{self.project['prefix']}-tg-foo-app",
-            target_type=aws_elasticloadbalancingv2.TargetType.INSTANCE,
+            target_type=aws_elasticloadbalancingv2.TargetType.IP,
             vpc=self.vpc)
         # ALB
         # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_elasticloadbalancingv2/ApplicationLoadBalancer.html
@@ -45,18 +45,18 @@ class ElasticLoadBalancerStack(Stack):
             http2_enabled=True,
             idle_timeout=None,
             ip_address_type=aws_elasticloadbalancingv2.IpAddressType.IPV4,
-            security_group=self.security_group['ext-alb'],
+            security_group=self.security_group['example'],
             vpc=self.vpc,
             deletion_protection=None,
             internet_facing=True,
             load_balancer_name=f"{self.project['prefix']}-ext-alb",
             vpc_subnets=aws_ec2.SubnetSelection(subnet_type=aws_ec2.SubnetType.PUBLIC))
         self.elb['ext-alb'].add_listener("listener-ext-alb",
-            certificates=[
-                aws_certificatemanager.Certificate.from_certificate_arn(self,"certificate",
-                    certificate_arn="arn:aws:acm:us-east-1:242593025403:certificate/099e74ff-1a17-4b79-b1bc-6b3fe2c85dfd"
-                )
-            ],
+            # certificates=[
+            #     aws_certificatemanager.Certificate.from_certificate_arn(self,"certificate",
+            #         certificate_arn="arn:aws:acm:us-east-1:242593025403:certificate/099e74ff-1a17-4b79-b1bc-6b3fe2c85dfd"
+            #     )
+            # ],
             default_action=aws_elasticloadbalancingv2.ListenerAction.fixed_response(
                 status_code=404,
                 content_type="text/plain",
@@ -64,7 +64,7 @@ class ElasticLoadBalancerStack(Stack):
             ),
             default_target_groups=None,
             open=None,
-            port=443,
+            port=80,
             protocol=None,
             ssl_policy=None
         ).add_action(
@@ -81,22 +81,3 @@ class ElasticLoadBalancerStack(Stack):
             ],
             priority=10
         )
-        
-    def create_security_group(self):
-        # Demostration code, Recommend create from security_group stack.
-        self.security_group['ext-alb'] = aws_ec2.SecurityGroup(self, 'sg-ext-alb',
-            vpc                 = self.vpc,
-            security_group_name = f"{self.project['prefix']}-sg-ext-alb",
-            description         = "",
-            allow_all_outbound  = True)
-        Tags.of(self.security_group['ext-alb']).add(
-            "Name",
-            f"{self.project['prefix']}-sg-ext-alb")
-        self.security_group['ext-alb'].add_ingress_rule(
-            peer = aws_ec2.Peer.ipv4('0.0.0.0/0'),
-            connection = aws_ec2.Port(
-                protocol=aws_ec2.Protocol.TCP,
-                string_representation="1", # Unique value
-                from_port=443,
-                to_port=443),
-            description = "")
