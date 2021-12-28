@@ -15,7 +15,7 @@ class SecurityGroupStack(Stack):
         self.add_security_group(
             name = "example",
             description = "",
-            allow_all_outbound = False)
+            allow_all_outbound = True)
         '''
             Security Group Rules
             1. Ingress
@@ -55,7 +55,7 @@ class SecurityGroupStack(Stack):
                 to_port=3306),
             description = "")
 
-        # 2-2. All Traffic, Specific address
+        # 2-2. All Traffic, IPv4 CIDR
         self.security_group['example'].add_egress_rule(
             peer = aws_ec2.Peer.ipv4('8.8.8.8/32'),
             connection = aws_ec2.Port(
