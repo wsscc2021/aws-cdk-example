@@ -14,12 +14,14 @@ from vpc.vpc_stack import VpcStack
 from security.iam.iam_stack import IamStack
 from security.kms.kms_stack import KmsStack
 from s3.s3_stack import S3Stack
+from ecr.ecr_stack import EcrStack
 from lambda_.lambda_stack import LambdaStack
 from security.security_group.security_group_stack import SecurityGroupStack
 from security.nacl.nacl_stack import NaclStack
 from eks.eks_stack import EksStack
 from ec2.instance_stack import EC2InstanceStack
 from elb.elb_stack import ElasticLoadBalancerStack
+from ecs.ecs_stack import EcsStack
 from ec2.asg_stack import AutoScalingGroupStack
 from rds.rds_stack import RdsStack
 from efs.efs_stack import EfsStack
@@ -30,11 +32,11 @@ from cicd.cicd_stack import CiCdStack
 # Information of project
 project = dict()
 project['account'] = "242593025403"
-project['region']  = "us-east-1"
+project['region']  = "us-east-2"
 project['env']     = "dev"
 project['name']    = "cdkworkshop"
 project['prefix']  = f"{project['env']}-{project['name']}"
-project['keypair'] = "dev-useast1"
+project['keypair'] = "dev-useast2"
 
 # Environment
 cdk_environment = Environment(
@@ -68,6 +70,11 @@ s3_stack = S3Stack(
     env          = cdk_environment,
     construct_id = f"{project['prefix']}-s3",
     project      = project)
+
+ecr_stack = EcrStack(
+    scope          = app,
+    construct_id   = f"{project['prefix']}-ecr",
+    env            = cdk_environment)
 
 lambda_stack = LambdaStack(
     scope        = app,
@@ -112,6 +119,15 @@ elb_stack = ElasticLoadBalancerStack(
     project        = project,
     vpc            = vpc_stack.vpc,
     security_group = security_group_stack.security_group)
+
+ecs_stack = EcsStack(
+    scope          = app,
+    construct_id   = f"{project['prefix']}-ecs",
+    env            = cdk_environment,
+    project        = project,
+    vpc            = vpc_stack.vpc,
+    security_group = security_group_stack.security_group,
+    target_group   = elb_stack.target_group)
 
 asg_stack = AutoScalingGroupStack(
     scope          = app,
