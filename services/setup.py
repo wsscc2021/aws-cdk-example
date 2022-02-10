@@ -19,7 +19,7 @@ setuptools.setup(
     packages=setuptools.find_packages(where="."),
 
     install_requires=[
-        "aws-cdk-lib>=2.1.0",
+        "aws-cdk-lib==2.1.0",
         "constructs>=10.0.0"
     ],
 
