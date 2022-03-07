@@ -32,11 +32,11 @@ from cicd.cicd_stack import CiCdStack
 # Information of project
 project = dict()
 project['account'] = "242593025403"
-project['region']  = "us-east-2"
+project['region']  = "us-west-2"
 project['env']     = "dev"
 project['name']    = "cdkworkshop"
 project['prefix']  = f"{project['env']}-{project['name']}"
-project['keypair'] = "dev-useast2"
+project['keypair'] = "dev-uswest2"
 
 # Environment
 cdk_environment = Environment(
