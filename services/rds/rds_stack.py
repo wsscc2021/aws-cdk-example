@@ -49,10 +49,11 @@ class RdsStack(Stack):
         )
 
         # database
-        self.add_aurora_mysql()
-        self.add_aurora_postgres()
-        self.add_mysql()
-        self.add_postgres()
+        # self.add_aurora_mysql()
+        # self.add_aurora_postgres()
+        self.add_aurora_mysql_serverless()
+        # self.add_mysql()
+        # self.add_postgres()
     
     def add_aurora_mysql(self):
         # Parameter group
@@ -169,6 +170,37 @@ class RdsStack(Stack):
             s3_export_role=None, # default none
             s3_import_buckets=None, # default none
             s3_import_role=None # default none
+        )
+    
+    def add_aurora_mysql_serverless(self):
+        # parameter group
+        parameter_group = aws_rds.ParameterGroup(self, "aurora_mysql_serverless_parameter_group", 
+            engine=aws_rds.DatabaseClusterEngine.aurora_mysql(
+                version=aws_rds.AuroraMysqlEngineVersion.VER_2_07_1),
+            description="aurora-mysql's paramter-group",
+            parameters={
+                "max_connections": "1500"
+            })
+        # serverless cluster
+        aws_rds.ServerlessCluster(self, "aurora_mysql_serverless",
+            engine=aws_rds.DatabaseClusterEngine.aurora_mysql(
+                version=aws_rds.AuroraMysqlEngineVersion.VER_2_07_1),
+            vpc=self.vpc,
+            backup_retention=None,
+            cluster_identifier=f"{self.project['prefix']}-aurora-mysql-serverless",
+            credentials=None,
+            default_database_name="db",
+            deletion_protection=None,
+            enable_data_api=True,
+            parameter_group=parameter_group,
+            removal_policy=RemovalPolicy.DESTROY,
+            scaling=None,
+            security_groups=[
+                self.security_group['example']
+            ],
+            storage_encryption_key=self.kms_key['rds'],
+            subnet_group=self.subnet_group,
+            vpc_subnets=None
         )
     
     def add_mysql(self):
