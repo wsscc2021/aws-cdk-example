@@ -148,6 +148,12 @@ class EksStack(Stack):
             labels={
                 "Key1": "Value1"
             },
+            taints=[
+                aws_eks.TaintSpec(
+                    effect=aws_eks.TaintEffect.NO_SCHEDULE,
+                    key="Key1",
+                    value="Value1")
+            ],
             # disk_size=20,
             capacity_type=aws_eks.CapacityType.ON_DEMAND,
             max_size=20,
