@@ -154,6 +154,7 @@ class EksStack(Stack):
                     key="Key1",
                     value="Value1")
             ],
+            ami_type=aws_eks.NodegroupAmiType.BOTTLEROCKET_X86_64,
             # disk_size=20,
             capacity_type=aws_eks.CapacityType.ON_DEMAND,
             max_size=20,
