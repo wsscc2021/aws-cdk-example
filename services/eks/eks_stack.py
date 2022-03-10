@@ -245,7 +245,17 @@ class EksStack(Stack):
             },
             timeout=None,
             wait=None)
-
+        self.eks_cluster.add_helm_chart(
+            "helm-metrics-server",
+            repository="https://kubernetes-sigs.github.io/metrics-server/",
+            chart="metrics-server",
+            release="metrics-server",
+            version=None, 
+            create_namespace=None,
+            namespace="kube-system",
+            values=None,
+            timeout=None,
+            wait=None)
         self.eks_cluster.add_helm_chart(
             "helm-cluster-autoscaler",
             repository="https://kubernetes.github.io/autoscaler",
