@@ -27,8 +27,8 @@ class VPCStack(Stack):
 
         # subnet
         # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_ec2/CfnSubnet.html
-        subnets = dict()
-        subnets['public-a'] = aws_ec2.CfnSubnet(self, "subnet-public-a",
+        self.subnets = dict()
+        self.subnets['public-a'] = aws_ec2.CfnSubnet(self, "subnet-public-a",
             vpc_id=self.vpc.ref,
             cidr_block="10.10.1.0/24",
             availability_zone="us-east-1a",
@@ -39,7 +39,7 @@ class VPCStack(Stack):
                     value="usdev-pub-a"
                 )
             ])
-        subnets['public-b'] = aws_ec2.CfnSubnet(self, "subnet-public-b",
+        self.subnets['public-b'] = aws_ec2.CfnSubnet(self, "subnet-public-b",
             vpc_id=self.vpc.ref,
             cidr_block="10.10.2.0/24",
             availability_zone="us-east-1b",
@@ -50,7 +50,7 @@ class VPCStack(Stack):
                     value="usdev-pub-b"
                 )
             ])
-        subnets['private-a'] = aws_ec2.CfnSubnet(self, "subnet-private-a",
+        self.subnets['private-a'] = aws_ec2.CfnSubnet(self, "subnet-private-a",
             vpc_id=self.vpc.ref,
             cidr_block="10.10.11.0/24",
             availability_zone="us-east-1a",
@@ -61,7 +61,7 @@ class VPCStack(Stack):
                     value="usdev-priv-a"
                 )
             ])
-        subnets['private-b'] = aws_ec2.CfnSubnet(self, "subnet-private-b",
+        self.subnets['private-b'] = aws_ec2.CfnSubnet(self, "subnet-private-b",
             vpc_id=self.vpc.ref,
             cidr_block="10.10.12.0/24",
             availability_zone="us-east-1b",
@@ -108,7 +108,7 @@ class VPCStack(Stack):
         # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_ec2/CfnNatGateway.html
         nat_gateways = dict()
         nat_gateways['public-a'] = aws_ec2.CfnNatGateway(self, "NatGatewayA",
-            subnet_id=subnets['public-a'].ref,
+            subnet_id=self.subnets['public-a'].ref,
             allocation_id=eip['natgw-a'].attr_allocation_id,
             tags=[
                 CfnTag(
@@ -117,7 +117,7 @@ class VPCStack(Stack):
                 )
             ])
         nat_gateways['public-b'] = aws_ec2.CfnNatGateway(self, "NatGatewayB",
-            subnet_id=subnets['public-b'].ref,
+            subnet_id=self.subnets['public-b'].ref,
             allocation_id=eip['natgw-b'].attr_allocation_id,
             tags=[
                 CfnTag(
@@ -180,22 +180,22 @@ class VPCStack(Stack):
             aws_ec2.CfnSubnetRouteTableAssociation(self,
                 "SubnetRouteTableAssociationPublicA",
                 route_table_id=route_tables["public"].ref,
-                subnet_id=subnets["public-a"].ref
+                subnet_id=self.subnets["public-a"].ref
             ),
             aws_ec2.CfnSubnetRouteTableAssociation(self,
                 "SubnetRouteTableAssociationPublicB",
                 route_table_id=route_tables["public"].ref,
-                subnet_id=subnets["public-b"].ref
+                subnet_id=self.subnets["public-b"].ref
             ),
             aws_ec2.CfnSubnetRouteTableAssociation(self,
                 "SubnetRouteTableAssociationPrivateA",
                 route_table_id=route_tables["private-a"].ref,
-                subnet_id=subnets["private-a"].ref
+                subnet_id=self.subnets["private-a"].ref
             ),
             aws_ec2.CfnSubnetRouteTableAssociation(self,
                 "SubnetRouteTableAssociationPrivateB",
                 route_table_id=route_tables["private-b"].ref,
-                subnet_id=subnets["private-b"].ref
+                subnet_id=self.subnets["private-b"].ref
             ),
         ]
         
