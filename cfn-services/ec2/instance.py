@@ -1,4 +1,3 @@
-import base64
 from constructs import Construct
 from aws_cdk import (
     Stack,
