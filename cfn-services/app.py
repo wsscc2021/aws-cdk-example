@@ -8,6 +8,7 @@ from aws_cdk import (
 from vpc import VPCStack
 from security.security_group import SecurityGroupStack
 from ec2.instance import EC2InstanceStack
+from ec2.auto_scaling_group import AutoScalingGroupStack
 
 # CDK App
 app = App()
@@ -25,6 +26,12 @@ securityGroupStack = SecurityGroupStack(
 ec2InstanceStack = EC2InstanceStack(
     scope           = app,
     construct_id    = "ec2-instance",
+    subnets         = vpcStack.subnets,
+    security_groups = securityGroupStack.security_groups,)
+
+autoScalingGroupStack = AutoScalingGroupStack(
+    scope           = app,
+    construct_id    = "ec2-asg",
     subnets         = vpcStack.subnets,
     security_groups = securityGroupStack.security_groups,)
 
