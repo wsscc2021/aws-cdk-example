@@ -3,14 +3,62 @@ from aws_cdk import (
     Stack,
     CfnTag,
     Fn,
+    aws_iam,
     aws_ec2,
     aws_autoscaling,
 )
 
 class AutoScalingGroupStack(Stack):
 
-    def __init__(self, scope: Construct, construct_id: str, subnets, security_groups, **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, subnets, 
+                       security_groups, target_groups, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
+
+        # IAM Role
+        # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_iam/CfnRole.html
+        iam_roles = dict()
+        iam_roles["product-api"] = aws_iam.CfnRole(self, "role-product-api",
+            assume_role_policy_document={
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Principal": {
+                            "Service": [
+                                "ec2.amazonaws.com"
+                            ]
+                        },
+                        "Action": [
+                            "sts:AssumeRole"
+                        ]
+                    }
+                ]
+            },
+            description="description",
+            managed_policy_arns=[
+                "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess",
+                "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy",
+                "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
+            ],
+            max_session_duration=3600,
+            path="/",
+            permissions_boundary=None,
+            policies=None,
+            role_name="product-api-role",
+            tags=[
+                CfnTag(
+                    key="Name",
+                    value="product-api-role"
+                )
+            ])
+
+        iam_instance_profile = dict()
+        iam_instance_profile["product-api"] = aws_iam.CfnInstanceProfile(self,
+            "instance-profile-product-api",
+            roles=[
+                iam_roles["product-api"].ref
+            ],
+            path="/")
 
         # Machine Image
         # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_ec2/MachineImage.html
@@ -29,7 +77,7 @@ class AutoScalingGroupStack(Stack):
         ami_id = ami.get_image(self).image_id
         
         # userdata
-        with open("./ec2/userdata.sh") as f:
+        with open("./ec2/was_userdata.sh") as f:
             userdata = f.read()
 
         # Launch Template
@@ -65,7 +113,8 @@ class AutoScalingGroupStack(Stack):
                             snapshot_id=None,),),
                 ],
                 disable_api_termination=None,
-                iam_instance_profile=None,
+                iam_instance_profile=aws_ec2.CfnLaunchTemplate.IamInstanceProfileProperty(
+                    arn=iam_instance_profile["product-api"].attr_arn,),
                 key_name="bastion-keypair",
                 monitoring=None, # detail monitoring
                 security_group_ids=[
@@ -102,13 +151,14 @@ class AutoScalingGroupStack(Stack):
             cooldown="120", # default cool down time
             desired_capacity_type="units", # units , vcpu , memory-mib
             health_check_grace_period=60,
-            health_check_type="EC2", # EC2 , ELB
-            load_balancer_names=None,
-            target_group_arns=None,
+            health_check_type="ELB", # EC2 , ELB
+            target_group_arns=[
+                target_groups["product-api"].ref,
+            ],
             launch_template=aws_autoscaling.CfnAutoScalingGroup.LaunchTemplateSpecificationProperty(
                 version=Fn.get_att(
                     logical_name_of_resource=launch_templates["product-api"].logical_id,
-                    attribute_name="DefaultVersionNumber"
+                    attribute_name="LatestVersionNumber"
                 ).to_string(),
                 launch_template_id=launch_templates["product-api"].ref,),
             metrics_collection=None,

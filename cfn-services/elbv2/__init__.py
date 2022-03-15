@@ -2,7 +2,6 @@ from constructs import Construct
 from aws_cdk import (
     Stack,
     CfnTag,
-    Fn,
     aws_elasticloadbalancingv2,
 )
 
@@ -34,7 +33,11 @@ class ElasticLoadBalancerStack(Stack):
                     value="product-api-tg"
                 )
             ],
-            target_group_attributes=None,
+            target_group_attributes=[
+                aws_elasticloadbalancingv2.CfnTargetGroup.TargetGroupAttributeProperty(
+                    key="deregistration_delay.timeout_seconds",
+                    value="30"),
+            ],
             targets=None,
             target_type="instance", # instance, ip, lambda
             vpc_id=vpc.ref)

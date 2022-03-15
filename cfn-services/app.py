@@ -24,6 +24,13 @@ securityGroupStack = SecurityGroupStack(
     construct_id = "security-group",
     vpc          = vpcStack.vpc)
 
+elasticLoadBalancerStack = ElasticLoadBalancerStack(
+    scope           = app,
+    construct_id    = "elbv2",
+    vpc             = vpcStack.vpc,
+    subnets         = vpcStack.subnets,
+    security_groups = securityGroupStack.security_groups,)
+
 ec2InstanceStack = EC2InstanceStack(
     scope           = app,
     construct_id    = "ec2-instance",
@@ -34,14 +41,8 @@ autoScalingGroupStack = AutoScalingGroupStack(
     scope           = app,
     construct_id    = "ec2-asg",
     subnets         = vpcStack.subnets,
-    security_groups = securityGroupStack.security_groups,)
-
-elasticLoadBalancerStack = ElasticLoadBalancerStack(
-    scope           = app,
-    construct_id    = "elbv2",
-    vpc             = vpcStack.vpc,
-    subnets         = vpcStack.subnets,
-    security_groups = securityGroupStack.security_groups,)
+    security_groups = securityGroupStack.security_groups,
+    target_groups   = elasticLoadBalancerStack.target_groups,)
 
 # Synthesize
 app.synth()
