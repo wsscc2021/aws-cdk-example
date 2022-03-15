@@ -6,6 +6,7 @@ from aws_cdk import (
 
 # Import service stack modules
 from vpc import VPCStack
+from security.security_group import SecurityGroupStack
 
 # CDK App
 app = App()
@@ -14,6 +15,11 @@ app = App()
 vpcStack = VPCStack(
     scope        = app,
     construct_id = "vpc")
+
+securityGroupStack = SecurityGroupStack(
+    scope        = app,
+    construct_id = "security-group",
+    vpc          = vpcStack.vpc)
 
 # Synthesize
 app.synth()
