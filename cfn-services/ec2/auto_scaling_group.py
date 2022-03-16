@@ -52,6 +52,8 @@ class AutoScalingGroupStack(Stack):
                 )
             ])
 
+        # instance profile
+        # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_iam/CfnInstanceProfile.html
         iam_instance_profile = dict()
         iam_instance_profile["product-api"] = aws_iam.CfnInstanceProfile(self,
             "instance-profile-product-api",
