@@ -52,6 +52,19 @@ class SecurityGroupStack(Stack):
                     value="bastion-sg"
                 )
             ])
+        self.security_groups["privatelink"] = aws_ec2.CfnSecurityGroup(self,
+            "privatelink-sg",
+            group_name="privatelink-sg",
+            group_description="description",
+            security_group_egress=None,
+            security_group_ingress=None,
+            vpc_id=vpc.ref,
+            tags=[
+                CfnTag(
+                    key="Name",
+                    value="privatelink-sg"
+                )
+            ])
         
         # security group ingress
         # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_ec2/CfnSecurityGroupIngress.html
@@ -108,6 +121,18 @@ class SecurityGroupStack(Stack):
             from_port=22, # -1 (all)
             to_port=22, # -1 (all)
             group_id=self.security_groups["bastion"].ref,
+            group_name=None,
+            source_prefix_list_id=None,
+            source_security_group_id=None,
+            source_security_group_name=None,
+            source_security_group_owner_id=None,)
+        
+        aws_ec2.CfnSecurityGroupIngress(self, "privatelink-sg-r1",
+            ip_protocol="tcp", # tcp , udp , icmp , icmpv6 , -1 (all)
+            cidr_ip="10.10.0.0/16",
+            from_port=443, # -1 (all)
+            to_port=443, # -1 (all)
+            group_id=self.security_groups["privatelink"].ref,
             group_name=None,
             source_prefix_list_id=None,
             source_security_group_id=None,

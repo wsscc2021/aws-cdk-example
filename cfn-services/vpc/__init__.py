@@ -100,7 +100,7 @@ class VPCStack(Stack):
             tags=[
                 CfnTag(
                     key="Name",
-                    value="usdev-natgw-a-eip"
+                    value="usdev-natgw-b-eip"
                 )
             ])
 
@@ -128,8 +128,8 @@ class VPCStack(Stack):
 
         # route table
         # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_ec2/CfnRouteTable.html
-        route_tables = dict()
-        route_tables['public'] = aws_ec2.CfnRouteTable(self, "RoutTablePublic",
+        self.route_tables = dict()
+        self.route_tables['public'] = aws_ec2.CfnRouteTable(self, "RoutTablePublic",
             vpc_id=self.vpc.ref,
             tags=[
                 CfnTag(
@@ -137,7 +137,7 @@ class VPCStack(Stack):
                     value="usdev-pub-rt"
                 )
             ])
-        route_tables['private-a'] = aws_ec2.CfnRouteTable(self, "RoutTablePrivateA",
+        self.route_tables['private-a'] = aws_ec2.CfnRouteTable(self, "RoutTablePrivateA",
             vpc_id=self.vpc.ref,
             tags=[
                 CfnTag(
@@ -145,7 +145,7 @@ class VPCStack(Stack):
                     value="usdev-priv-a-rt"
                 )
             ])
-        route_tables['private-b'] = aws_ec2.CfnRouteTable(self, "RoutTablePrivateB",
+        self.route_tables['private-b'] = aws_ec2.CfnRouteTable(self, "RoutTablePrivateB",
             vpc_id=self.vpc.ref,
             tags=[
                 CfnTag(
@@ -158,17 +158,17 @@ class VPCStack(Stack):
         # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_ec2/CfnRoute.html
         routes = [
             aws_ec2.CfnRoute(self, "RouteDefaultPublic",
-                route_table_id=route_tables['public'].ref,
+                route_table_id=self.route_tables['public'].ref,
                 destination_cidr_block="0.0.0.0/0",
                 gateway_id=internet_gateway.ref
             ),
             aws_ec2.CfnRoute(self, "RouteDefaultPrivateA",
-                route_table_id=route_tables["private-a"].ref,
+                route_table_id=self.route_tables["private-a"].ref,
                 destination_cidr_block="0.0.0.0/0",
                 nat_gateway_id=nat_gateways["public-a"].ref
             ),
             aws_ec2.CfnRoute(self, "RouteDefaultPrivateB",
-                route_table_id=route_tables["private-b"].ref,
+                route_table_id=self.route_tables["private-b"].ref,
                 destination_cidr_block="0.0.0.0/0",
                 nat_gateway_id=nat_gateways["public-b"].ref
             ),
@@ -179,38 +179,23 @@ class VPCStack(Stack):
         subnet_route_table_associations = [
             aws_ec2.CfnSubnetRouteTableAssociation(self,
                 "SubnetRouteTableAssociationPublicA",
-                route_table_id=route_tables["public"].ref,
+                route_table_id=self.route_tables["public"].ref,
                 subnet_id=self.subnets["public-a"].ref
             ),
             aws_ec2.CfnSubnetRouteTableAssociation(self,
                 "SubnetRouteTableAssociationPublicB",
-                route_table_id=route_tables["public"].ref,
+                route_table_id=self.route_tables["public"].ref,
                 subnet_id=self.subnets["public-b"].ref
             ),
             aws_ec2.CfnSubnetRouteTableAssociation(self,
                 "SubnetRouteTableAssociationPrivateA",
-                route_table_id=route_tables["private-a"].ref,
+                route_table_id=self.route_tables["private-a"].ref,
                 subnet_id=self.subnets["private-a"].ref
             ),
             aws_ec2.CfnSubnetRouteTableAssociation(self,
                 "SubnetRouteTableAssociationPrivateB",
-                route_table_id=route_tables["private-b"].ref,
+                route_table_id=self.route_tables["private-b"].ref,
                 subnet_id=self.subnets["private-b"].ref
             ),
         ]
         
-        # vpc endpoint
-        # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_ec2/CfnVPCEndpoint.html
-        # !! tag is not working !!
-        vpc_endpoint = dict()
-        vpc_endpoint['dynamodb'] = aws_ec2.CfnVPCEndpoint(self, "VPCEndpointDynamoDB",
-            service_name="com.amazonaws.us-east-1.dynamodb",
-            vpc_id=self.vpc.ref,
-            policy_document=None,
-            private_dns_enabled=None, # only Interface type
-            route_table_ids=[
-                route_tables["public"].ref,
-                route_tables["private-a"].ref,
-                route_tables["private-b"].ref
-            ],
-            vpc_endpoint_type="Gateway")
