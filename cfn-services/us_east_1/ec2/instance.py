@@ -28,7 +28,7 @@ class EC2InstanceStack(Stack):
         ami_id = ami.get_image(self).image_id
 
         # userdata
-        with open("./ec2/userdata.sh") as f:
+        with open("./us_east_1/ec2/userdata.sh") as f:
             userdata = f.read()
         
         # instance

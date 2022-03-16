@@ -79,7 +79,7 @@ class AutoScalingGroupStack(Stack):
         ami_id = ami.get_image(self).image_id
         
         # userdata
-        with open("./ec2/was_userdata.sh") as f:
+        with open("./us_east_1/ec2/was_userdata.sh") as f:
             userdata = f.read()
 
         # Launch Template
@@ -120,7 +120,7 @@ class AutoScalingGroupStack(Stack):
                 key_name="bastion-keypair",
                 monitoring=None, # detail monitoring
                 security_group_ids=[
-                    security_groups["product-api"].ref
+                    security_groups["product-api"].ref,
                 ],
                 tag_specifications=[
                     aws_ec2.CfnLaunchTemplate.TagSpecificationProperty(
