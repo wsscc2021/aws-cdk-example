@@ -155,7 +155,8 @@ class AutoScalingGroupStack(Stack):
             health_check_grace_period=60,
             health_check_type="ELB", # EC2 , ELB
             target_group_arns=[
-                target_groups["product-api"].ref,
+                target_groups["product-api-ext"].ref,
+                target_groups["product-api-int"].ref,
             ],
             launch_template=aws_autoscaling.CfnAutoScalingGroup.LaunchTemplateSpecificationProperty(
                 version=Fn.get_att(

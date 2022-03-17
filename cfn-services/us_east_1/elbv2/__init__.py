@@ -13,9 +13,11 @@ class ElasticLoadBalancerStack(Stack):
         # Target Groups
         # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_elasticloadbalancingv2/CfnTargetGroup.html
         self.target_groups = dict()
-        self.target_groups["product-api"] = aws_elasticloadbalancingv2.CfnTargetGroup(self, "tg-product-api",
+        self.target_groups["product-api-ext"] = aws_elasticloadbalancingv2.CfnTargetGroup(self, "tg-product-api-ext",
+            # application load balancer target group
+            # 
             health_check_enabled=True,
-            health_check_interval_seconds=15,
+            health_check_interval_seconds=10,
             health_check_path="/health",
             health_check_port="8080",
             health_check_protocol="HTTP", # TCP, HTTP, HTTPS
@@ -23,14 +25,14 @@ class ElasticLoadBalancerStack(Stack):
             healthy_threshold_count=2,
             unhealthy_threshold_count=2,
             ip_address_type="ipv4", # ipv4, ipv6
-            name="product-api-tg",
+            name="product-api-ext-tg",
             port=8080,
             protocol="HTTP", # HTTP, HTTPS
             protocol_version="HTTP1", # GRPC, HTTP1, HTTP2
             tags=[
                 CfnTag(
                     key="Name",
-                    value="product-api-tg"
+                    value="product-api-ext-tg"
                 )
             ],
             target_group_attributes=[
@@ -42,11 +44,44 @@ class ElasticLoadBalancerStack(Stack):
             target_type="instance", # instance, ip, lambda
             vpc_id=vpc.ref)
         
+        self.target_groups["product-api-int"] = aws_elasticloadbalancingv2.CfnTargetGroup(self, "tg-product-api-int",
+            # netwrok load balancer target group
+            # 
+            health_check_enabled=True,
+            health_check_interval_seconds=10, # 10, 30
+            health_check_path="/health",
+            health_check_port="8080",
+            health_check_protocol="HTTP", # TCP, HTTP, HTTPS
+            health_check_timeout_seconds=None, # TCP Targetgroup can not support
+            healthy_threshold_count=2,
+            unhealthy_threshold_count=2,
+            ip_address_type="ipv4", # ipv4, ipv6
+            name="product-api-int-tg",
+            port=8080,
+            protocol="TCP", # TCP, TLS, UDP, TCP_UDP
+            protocol_version=None, # only HTTP, HTTPS
+            tags=[
+                CfnTag(
+                    key="Name",
+                    value="product-api-int-tg"
+                )
+            ],
+            target_group_attributes=[
+                aws_elasticloadbalancingv2.CfnTargetGroup.TargetGroupAttributeProperty(
+                    key="deregistration_delay.timeout_seconds",
+                    value="30"),
+            ],
+            targets=None,
+            target_type="instance", # instance, ip, lambda
+            vpc_id=vpc.ref)
+
+
         # load balancer
         # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_elasticloadbalancingv2/CfnLoadBalancer.html
         self.elb = dict()
         self.elb["product-ext"] = aws_elasticloadbalancingv2.CfnLoadBalancer(self, "elb-product-ext",
-            type="application",
+            type="application", # application, network, gateway
+            scheme="internet-facing", # internal, internet-facing
             ip_address_type="ipv4", # ipv4 , dualstack
             load_balancer_attributes=[
                 aws_elasticloadbalancingv2.CfnLoadBalancer.LoadBalancerAttributeProperty(
@@ -71,10 +106,37 @@ class ElasticLoadBalancerStack(Stack):
                 )
             ],)
         
+        self.elb["product-int"] = aws_elasticloadbalancingv2.CfnLoadBalancer(self, "elb-product-int",
+            type="network", # application, network, gateway
+            scheme="internal", # internal, internet-facing
+            ip_address_type="ipv4", # ipv4 , dualstack
+            load_balancer_attributes=[
+                aws_elasticloadbalancingv2.CfnLoadBalancer.LoadBalancerAttributeProperty(
+                    key="deletion_protection.enabled",
+                    value="false"),
+                aws_elasticloadbalancingv2.CfnLoadBalancer.LoadBalancerAttributeProperty(
+                    key="load_balancing.cross_zone.enabled",
+                    value="false"),
+            ],
+            name="product-int",
+            security_groups=None, # only ALB
+            subnets=[
+                subnets["private-a"].ref,
+                subnets["private-b"].ref,
+            ],
+            tags=[
+                CfnTag(
+                    key="Name",
+                    value="product-int"
+                )
+            ],)
+        
         # listener
         # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_elasticloadbalancingv2/CfnListener.html
         listners = dict()
         listners["product-ext-http"] = aws_elasticloadbalancingv2.CfnListener(self, "listener-product-ext-http",
+            # application load balancer listener
+            #
             default_actions=[
                 aws_elasticloadbalancingv2.CfnListener.ActionProperty(
                     type="fixed-response", # forward, redirect, fixed-response
@@ -90,7 +152,27 @@ class ElasticLoadBalancerStack(Stack):
             protocol="HTTP", # HTTP, HTTPS
             port=80,)
         
-        # listener rule
+        listners["product-int-http"] = aws_elasticloadbalancingv2.CfnListener(self, "listener-product-int-http",
+            # network load balancer listener
+            #
+            default_actions=[
+                aws_elasticloadbalancingv2.CfnListener.ActionProperty(
+                    type="forward", # forward
+                    forward_config = aws_elasticloadbalancingv2.CfnListener.ForwardConfigProperty(
+                        target_groups=[
+                            aws_elasticloadbalancingv2.CfnListener.TargetGroupTupleProperty(
+                                target_group_arn=self.target_groups["product-api-int"].ref,),
+                        ],
+                        target_group_stickiness_config=None),
+                    order=1,),
+            ],
+            load_balancer_arn=self.elb["product-int"].ref,
+            certificates=None,
+            ssl_policy=None,
+            protocol="TCP", # TCP, TLS, UDP, TCP_UDP
+            port=80,)
+        
+        # application load balancer additional rule
         # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_elasticloadbalancingv2/CfnListenerRule.html
         aws_elasticloadbalancingv2.CfnListenerRule(self, "listener-rule-product-ext-http-r1",
             actions=[
@@ -99,7 +181,7 @@ class ElasticLoadBalancerStack(Stack):
                     forward_config=aws_elasticloadbalancingv2.CfnListenerRule.ForwardConfigProperty(
                         target_groups=[
                             aws_elasticloadbalancingv2.CfnListenerRule.TargetGroupTupleProperty(
-                                target_group_arn=self.target_groups["product-api"].ref,
+                                target_group_arn=self.target_groups["product-api-ext"].ref,
                                 weight=100)
                         ],),
                     order=1,),

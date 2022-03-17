@@ -105,6 +105,18 @@ class SecurityGroupStack(Stack):
         
         aws_ec2.CfnSecurityGroupIngress(self, "product-api-sg-r2",
             ip_protocol="tcp", # tcp , udp , icmp , icmpv6 , -1 (all)
+            cidr_ip="10.10.0.0/16",
+            from_port=8080, # -1 (all)
+            to_port=8080, # -1 (all)
+            group_id=self.security_groups["product-api"].ref,
+            group_name=None,
+            source_prefix_list_id=None,
+            source_security_group_id=None,
+            source_security_group_name=None,
+            source_security_group_owner_id=None,)
+        
+        aws_ec2.CfnSecurityGroupIngress(self, "product-api-sg-r3",
+            ip_protocol="tcp", # tcp , udp , icmp , icmpv6 , -1 (all)
             cidr_ip=None,
             from_port=22, # -1 (all)
             to_port=22, # -1 (all)
