@@ -2,15 +2,17 @@
 from aws_cdk import (
     App, Environment
 )
-import us_east_1
-import ap_northeast_2
+import usdev
+import apdev
+import uswsi
 
 # CDK App
 app = App()
 
 # Stacks per region
-us_east_1.StackSet(app, Environment(region="us-east-1"))
-ap_northeast_2.StackSet(app, Environment(region="ap-northeast-2"))
+usdev.StackSet(app, "usdev", Environment(region="us-east-1"))
+uswsi.StackSet(app, "uswsi", Environment(region="us-east-1"))
+apdev.StackSet(app, "apdev", Environment(region="ap-northeast-2"))
 
 # Synthesize
 app.synth()

@@ -79,7 +79,7 @@ class AutoScalingGroupStack(Stack):
         ami_id = ami.get_image(self).image_id
         
         # userdata
-        with open("./us_east_1/ec2/was_userdata.sh") as f:
+        with open("./usdev/ec2/was_userdata.sh") as f:
             userdata = f.read()
 
         # Launch Template
