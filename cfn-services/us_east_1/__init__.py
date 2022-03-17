@@ -6,6 +6,7 @@ from us_east_1.security.security_group import SecurityGroupStack
 from us_east_1.ec2.instance import EC2InstanceStack
 from us_east_1.ec2.auto_scaling_group import AutoScalingGroupStack
 from us_east_1.elbv2 import ElasticLoadBalancerStack
+from us_east_1.security.nacl import NaclStack
 
 class StackSet:
 
@@ -20,6 +21,13 @@ class StackSet:
             env          = environment,
             construct_id = f"{environment.region}--security-group",
             vpc          = self.vpcStack.vpc)
+        
+        self.naclStack = NaclStack(
+            scope        = app,
+            env          = environment,
+            construct_id = f"{environment.region}--nacl",
+            vpc          = self.vpcStack.vpc,
+            subnets      = self.vpcStack.subnets,)
 
         self.privateLinkStack = PrivateLinkStack(
             scope           = app,
