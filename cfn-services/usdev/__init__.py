@@ -7,6 +7,7 @@ from usdev.ec2.instance import EC2InstanceStack
 from usdev.ec2.auto_scaling_group import AutoScalingGroupStack
 from usdev.elbv2 import ElasticLoadBalancerStack
 from usdev.security.nacl import NaclStack
+from usdev.route53 import Route53Stack
 
 class StackSet:
 
@@ -15,6 +16,12 @@ class StackSet:
             scope        = app,
             env          = environment,
             construct_id = f"{construct_prefix}--vpc")
+
+        self.route53Stack = Route53Stack(
+            scope        = app,
+            env          = environment,
+            construct_id = f"{construct_prefix}--route53",
+            vpc          = self.vpcStack.vpc)
 
         self.securityGroupStack = SecurityGroupStack(
             scope        = app,
