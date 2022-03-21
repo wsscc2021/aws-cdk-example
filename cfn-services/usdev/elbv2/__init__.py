@@ -70,6 +70,9 @@ class ElasticLoadBalancerStack(Stack):
                 aws_elasticloadbalancingv2.CfnTargetGroup.TargetGroupAttributeProperty(
                     key="deregistration_delay.timeout_seconds",
                     value="30"),
+                aws_elasticloadbalancingv2.CfnTargetGroup.TargetGroupAttributeProperty(
+                    key="deregistration_delay.connection_termination.enabled",
+                    value="true"),
             ],
             targets=None,
             target_type="instance", # instance, ip, lambda
