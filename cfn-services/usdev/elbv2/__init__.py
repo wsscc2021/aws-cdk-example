@@ -19,7 +19,7 @@ class ElasticLoadBalancerStack(Stack):
             health_check_enabled=True,
             health_check_interval_seconds=10,
             health_check_path="/health",
-            health_check_port="8080",
+            health_check_port="traffic-port", # traffic-port, 8080, 80 ...
             health_check_protocol="HTTP", # TCP, HTTP, HTTPS
             health_check_timeout_seconds=5,
             healthy_threshold_count=2,
@@ -50,7 +50,7 @@ class ElasticLoadBalancerStack(Stack):
             health_check_enabled=True,
             health_check_interval_seconds=10, # 10, 30
             health_check_path="/health",
-            health_check_port="8080",
+            health_check_port="traffic-port", # traffic-port, 8080, 80 ...
             health_check_protocol="HTTP", # TCP, HTTP, HTTPS
             health_check_timeout_seconds=None, # TCP Targetgroup can not support
             healthy_threshold_count=2,
