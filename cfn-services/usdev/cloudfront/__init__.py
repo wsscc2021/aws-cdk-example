@@ -10,9 +10,16 @@ class CloudfrontStack(Stack):
     def __init__(self, scope: Construct, construct_id: str, elb, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
+        # resources
+        self.policy()
+        self.distribution_elb(elb)
+        self.distribution_s3()
+        
+
+    def policy(self):
         # cache policy
         # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_cloudfront/CfnCachePolicy.html
-        cache_policy = aws_cloudfront.CfnCachePolicy(self, "cache-policy",
+        self.cache_policy = aws_cloudfront.CfnCachePolicy(self, "cache-policy",
             cache_policy_config=aws_cloudfront.CfnCachePolicy.CachePolicyConfigProperty(
                 name="custom-cache-policy",
                 comment=None,
@@ -40,7 +47,7 @@ class CloudfrontStack(Stack):
 
         # origin request policy
         # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_cloudfront/CfnOriginRequestPolicy.html
-        origin_request_policy = aws_cloudfront.CfnOriginRequestPolicy(self, "origin-request-policy",
+        self.origin_request_policy = aws_cloudfront.CfnOriginRequestPolicy(self, "origin-request-policy",
             origin_request_policy_config=aws_cloudfront.CfnOriginRequestPolicy.OriginRequestPolicyConfigProperty(
                 name="custom-origin-request-policy",
                 comment=None,
@@ -58,10 +65,12 @@ class CloudfrontStack(Stack):
                 ),
             )
         )
-        
+    
+    
+    def distribution_elb(self, elb):
         # Distribution
         # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_cloudfront/CfnDistribution.html
-        aws_cloudfront.CfnDistribution(self, "cloudfront-distribution",
+        aws_cloudfront.CfnDistribution(self, "cloudfront-distribution-elb",
             distribution_config=aws_cloudfront.CfnDistribution.DistributionConfigProperty(
                 enabled=True,
                 comment=None,
@@ -107,8 +116,76 @@ class CloudfrontStack(Stack):
                     # https://docs.aws.amazon.com/ko_kr/AmazonCloudFront/latest/DeveloperGuide/using-managed-cache-policies.html
                     # managed origin request policy id
                     # https://docs.aws.amazon.com/ko_kr/AmazonCloudFront/latest/DeveloperGuide/using-managed-origin-request-policies.html
-                    cache_policy_id=cache_policy.ref,
-                    origin_request_policy_id=origin_request_policy.ref,
+                    cache_policy_id=self.cache_policy.ref,
+                    origin_request_policy_id=self.origin_request_policy.ref,
+                    response_headers_policy_id=None,
+                    field_level_encryption_id=None,
+                    function_associations=None,
+                    lambda_function_associations=None,
+                    realtime_log_config_arn=None,
+                    smooth_streaming=None,
+                    trusted_key_groups=None,
+                    trusted_signers=None,
+                ),
+                cache_behaviors=None,
+                cnam_es=None, # CNAMEs
+                aliases=None, # CNAMEs (alternate domain names)
+                default_root_object=None, # str
+                http_version="http2", # http1.1 , http2
+                ipv6_enabled=True,
+                price_class="PriceClass_All", # PriceClass_All, PriceClass_100 , PriceClass_200
+                logging=None,
+            ),
+            tags=None)
+    
+
+    def distribution_s3(self):
+        # OAI
+        # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_cloudfront/CfnCloudFrontOriginAccessIdentity.html
+        oai = aws_cloudfront.CfnCloudFrontOriginAccessIdentity(self, "oai-us-static-contents-bucket.s3.us-east-1.amazonaws.com",
+            cloud_front_origin_access_identity_config=aws_cloudfront.CfnCloudFrontOriginAccessIdentity.CloudFrontOriginAccessIdentityConfigProperty(
+                comment="oai-us-static-contents-bucket.s3.us-east-1.amazonaws.com"))
+
+        # Distribution
+        # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_cloudfront/CfnDistribution.html
+        aws_cloudfront.CfnDistribution(self, "cloudfront-distribution-s3",
+            distribution_config=aws_cloudfront.CfnDistribution.DistributionConfigProperty(
+                enabled=True,
+                comment=None,
+                origin_groups=None,
+                origins=[
+                    aws_cloudfront.CfnDistribution.OriginProperty(
+                        id="OriginS3",
+                        domain_name="us-static-contents-bucket.s3.us-east-1.amazonaws.com",
+                        connection_attempts=3, # 1 ~ 3
+                        connection_timeout=10, # 1 ~ 10
+                        custom_origin_config=None,
+                        origin_custom_headers=None,
+                        origin_path=None, # str
+                        origin_shield=aws_cloudfront.CfnDistribution.OriginShieldProperty(
+                            enabled=True,
+                            origin_shield_region="us-east-1"
+                        ),
+                        s3_origin_config=aws_cloudfront.CfnDistribution.S3OriginConfigProperty(
+                            origin_access_identity=f"origin-access-identity/cloudfront/{oai.ref}"),
+                    ),
+                ],
+                default_cache_behavior=aws_cloudfront.CfnDistribution.DefaultCacheBehaviorProperty(
+                    target_origin_id="OriginS3",
+                    viewer_protocol_policy="redirect-to-https", # allow-all, redirect-to-https, https-only
+                    allowed_methods=[
+                        "GET", "HEAD", "OPTIONS"
+                    ],
+                    cached_methods=[
+                        "GET", "HEAD", "OPTIONS"
+                    ],
+                    compress=True,
+                    # managed cache policy id
+                    # https://docs.aws.amazon.com/ko_kr/AmazonCloudFront/latest/DeveloperGuide/using-managed-cache-policies.html
+                    # managed origin request policy id
+                    # https://docs.aws.amazon.com/ko_kr/AmazonCloudFront/latest/DeveloperGuide/using-managed-origin-request-policies.html
+                    cache_policy_id=self.cache_policy.ref,
+                    origin_request_policy_id=self.origin_request_policy.ref,
                     response_headers_policy_id=None,
                     field_level_encryption_id=None,
                     function_associations=None,
