@@ -117,7 +117,7 @@ class AutoScalingGroupStack(Stack):
                 disable_api_termination=None,
                 iam_instance_profile=aws_ec2.CfnLaunchTemplate.IamInstanceProfileProperty(
                     arn=iam_instance_profile["product-api"].attr_arn,),
-                key_name="bastion-keypair",
+                key_name="useast1-keypair",
                 monitoring=None, # detail monitoring
                 security_group_ids=[
                     security_groups["product-api"].ref,
