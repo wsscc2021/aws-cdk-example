@@ -99,7 +99,7 @@ class AutoScalingGroupStack(Stack):
             ],
             launch_template_data=aws_ec2.CfnLaunchTemplate.LaunchTemplateDataProperty(
                 image_id=ami_id,
-                instance_type="c5.large",
+                instance_type="t3.small",
                 ebs_optimized=None,
                 block_device_mappings=[
                     aws_ec2.CfnLaunchTemplate.BlockDeviceMappingProperty(
