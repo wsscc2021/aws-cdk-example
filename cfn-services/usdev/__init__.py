@@ -8,6 +8,7 @@ from usdev.ec2.auto_scaling_group import AutoScalingGroupStack
 from usdev.elbv2 import ElasticLoadBalancerStack
 from usdev.security.nacl import NaclStack
 from usdev.route53 import Route53Stack
+from usdev.cloudfront import CloudfrontStack
 
 class StackSet:
 
@@ -67,3 +68,9 @@ class StackSet:
             subnets         = self.vpcStack.subnets,
             security_groups = self.securityGroupStack.security_groups,
             target_groups   = self.elasticLoadBalancerStack.target_groups,)
+        
+        self.cloudfrontStack = CloudfrontStack(
+            scope        = app,
+            env          = environment,
+            construct_id = f"{construct_prefix}--cloudfront",
+            elb          = self.elasticLoadBalancerStack.elb,)
