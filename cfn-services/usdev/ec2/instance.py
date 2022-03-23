@@ -68,5 +68,5 @@ class EC2InstanceStack(Stack):
                     value="bastion"
                 )
             ],
-            key_name="bastion-keypair", # key-pair
+            key_name="useast1-keypair", # key-pair
             user_data=Fn.base64(userdata),)
