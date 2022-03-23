@@ -9,7 +9,7 @@ import uswsi
 # CDK App
 app = App()
 
-# Stacks per region
+# Stacks per vpc
 usdev.StackSet(app, "usdev", Environment(region="us-east-1"))
 uswsi.StackSet(app, "uswsi", Environment(region="us-east-1"))
 apdev.StackSet(app, "apdev", Environment(region="ap-northeast-2"))
