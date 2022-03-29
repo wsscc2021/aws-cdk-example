@@ -1,7 +1,6 @@
 from constructs import Construct
 from aws_cdk import (
     Stack,
-    CfnTag,
     aws_cloudfront,
 )
 
