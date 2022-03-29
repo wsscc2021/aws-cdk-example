@@ -9,6 +9,7 @@ from usdev.elbv2 import ElasticLoadBalancerStack
 from usdev.security.nacl import NaclStack
 from usdev.route53 import Route53Stack
 from usdev.cloudfront import CloudfrontStack
+from usdev._lambda import LambdaStack
 
 class StackSet:
 
@@ -74,3 +75,8 @@ class StackSet:
             env          = environment,
             construct_id = f"{construct_prefix}--cloudfront",
             elb          = self.elasticLoadBalancerStack.elb,)
+
+        self.lambdaStack = LambdaStack(
+            scope        = app,
+            env          = environment,
+            construct_id = f"{construct_prefix}--lambda",)
