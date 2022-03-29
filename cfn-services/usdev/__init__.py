@@ -10,6 +10,7 @@ from usdev.security.nacl import NaclStack
 from usdev.route53 import Route53Stack
 from usdev.cloudfront import CloudfrontStack
 from usdev._lambda import LambdaStack
+from usdev.apigateway import ApiGatewayStack
 
 class StackSet:
 
@@ -80,3 +81,8 @@ class StackSet:
             scope        = app,
             env          = environment,
             construct_id = f"{construct_prefix}--lambda",)
+        
+        self.apiGatewayStack = ApiGatewayStack(
+            scope        = app,
+            env          = environment,
+            construct_id = f"{construct_prefix}--api-gateway",)
