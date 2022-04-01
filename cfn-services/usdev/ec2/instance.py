@@ -3,6 +3,7 @@ from aws_cdk import (
     Stack,
     CfnTag,
     Fn,
+    aws_iam,
     aws_ec2
 )
 
@@ -10,6 +11,52 @@ class EC2InstanceStack(Stack):
 
     def __init__(self, scope: Construct, construct_id: str, subnets, security_groups, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
+
+        # IAM Role
+        # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_iam/CfnRole.html
+        iam_roles = dict()
+        iam_roles["bastion"] = aws_iam.CfnRole(self, "role-bastion",
+            assume_role_policy_document={
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Principal": {
+                            "Service": [
+                                "ec2.amazonaws.com"
+                            ]
+                        },
+                        "Action": [
+                            "sts:AssumeRole"
+                        ]
+                    }
+                ]
+            },
+            description="description",
+            managed_policy_arns=[
+                "arn:aws:iam::aws:policy/AmazonElasticFileSystemClientReadWriteAccess",
+            ],
+            max_session_duration=3600,
+            path="/",
+            permissions_boundary=None,
+            policies=None,
+            role_name="bastion-role",
+            tags=[
+                CfnTag(
+                    key="Name",
+                    value="bastion-role"
+                )
+            ])
+
+        # instance profile
+        # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_iam/CfnInstanceProfile.html
+        iam_instance_profile = dict()
+        iam_instance_profile["bastion"] = aws_iam.CfnInstanceProfile(self,
+            "instance-profile-bastion",
+            roles=[
+                iam_roles["bastion"].ref
+            ],
+            path="/")
 
         # Machine Image
         # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_ec2/MachineImage.html
@@ -52,7 +99,7 @@ class EC2InstanceStack(Stack):
                     ),
                 )
             ],
-            iam_instance_profile=None, # IAM Instance profile
+            iam_instance_profile=iam_instance_profile["bastion"].ref, # IAM Instance profile
             subnet_id=subnets["public-a"].ref, # Subnet
             security_group_ids=[ # Security groups
                 security_groups["example"].ref
