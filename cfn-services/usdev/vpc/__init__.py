@@ -72,6 +72,28 @@ class VPCStack(Stack):
                     value="usdev-priv-b"
                 )
             ])
+        self.subnets['data-a'] = aws_ec2.CfnSubnet(self, "subnet-data-a",
+            vpc_id=self.vpc.ref,
+            cidr_block="10.10.21.0/24",
+            availability_zone="us-east-1a",
+            map_public_ip_on_launch=False,
+            tags=[
+                CfnTag(
+                    key="Name",
+                    value="usdev-data-a"
+                )
+            ])
+        self.subnets['data-b'] = aws_ec2.CfnSubnet(self, "subnet-data-b",
+            vpc_id=self.vpc.ref,
+            cidr_block="10.10.22.0/24",
+            availability_zone="us-east-1b",
+            map_public_ip_on_launch=False,
+            tags=[
+                CfnTag(
+                    key="Name",
+                    value="usdev-data-b"
+                )
+            ])
         
         # internet gateway
         # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_ec2/CfnInternetGateway.html
@@ -153,7 +175,15 @@ class VPCStack(Stack):
                     value="usdev-priv-b-rt"
                 )
             ])
-        
+        self.route_tables['data'] = aws_ec2.CfnRouteTable(self, "RoutTableData",
+            vpc_id=self.vpc.ref,
+            tags=[
+                CfnTag(
+                    key="Name",
+                    value="usdev-data-rt"
+                )
+            ])
+
         # route
         # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_ec2/CfnRoute.html
         routes = [
@@ -196,6 +226,16 @@ class VPCStack(Stack):
                 "SubnetRouteTableAssociationPrivateB",
                 route_table_id=self.route_tables["private-b"].ref,
                 subnet_id=self.subnets["private-b"].ref
+            ),
+            aws_ec2.CfnSubnetRouteTableAssociation(self,
+                "SubnetRouteTableAssociationDataA",
+                route_table_id=self.route_tables["data"].ref,
+                subnet_id=self.subnets["data-a"].ref
+            ),
+            aws_ec2.CfnSubnetRouteTableAssociation(self,
+                "SubnetRouteTableAssociationDataB",
+                route_table_id=self.route_tables["data"].ref,
+                subnet_id=self.subnets["data-b"].ref
             ),
         ]
         
