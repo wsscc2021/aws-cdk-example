@@ -11,6 +11,7 @@ from usdev.route53 import Route53Stack
 from usdev.cloudfront import CloudfrontStack
 from usdev._lambda import LambdaStack
 from usdev.apigateway import ApiGatewayStack
+from usdev.efs import EFSStack
 
 class StackSet:
 
@@ -86,3 +87,10 @@ class StackSet:
             scope        = app,
             env          = environment,
             construct_id = f"{construct_prefix}--api-gateway",)
+            
+        self.efsStack = EFSStack(
+            scope           = app,
+            env             = environment,
+            construct_id    = f"{construct_prefix}--efs",
+            security_groups = self.securityGroupStack.security_groups,
+            subnets         = self.vpcStack.subnets,)
