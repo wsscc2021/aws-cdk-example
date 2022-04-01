@@ -55,7 +55,7 @@ class EC2InstanceStack(Stack):
             iam_instance_profile=None, # IAM Instance profile
             subnet_id=subnets["public-a"].ref, # Subnet
             security_group_ids=[ # Security groups
-                security_groups["bastion"].ref
+                security_groups["example"].ref
             ],
             monitoring=None, # detailed monitoring
             network_interfaces=None, # ENI

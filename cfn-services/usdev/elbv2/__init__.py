@@ -69,7 +69,7 @@ class ElasticLoadBalancerStack(Stack):
             ],
             name="product-ext",
             security_groups=[
-                security_groups["product-ext"].ref,
+                security_groups["example"].ref,
             ],
             subnets=[
                 subnets["public-a"].ref,

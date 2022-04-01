@@ -35,6 +35,6 @@ class PrivateLinkStack(Stack):
                 subnets["private-b"].ref,
             ],
             security_group_ids=[
-                security_groups["privatelink"].ref,
+                security_groups["example"].ref,
             ],
             vpc_endpoint_type="Interface")

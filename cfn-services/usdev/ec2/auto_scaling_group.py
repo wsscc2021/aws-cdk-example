@@ -120,7 +120,7 @@ class AutoScalingGroupStack(Stack):
                 key_name="useast1-keypair",
                 monitoring=None, # detail monitoring
                 security_group_ids=[
-                    security_groups["product-api"].ref,
+                    security_groups["example"].ref,
                 ],
                 tag_specifications=[
                     aws_ec2.CfnLaunchTemplate.TagSpecificationProperty(
