@@ -12,6 +12,7 @@ from usdev.cloudfront import CloudfrontStack
 from usdev._lambda import LambdaStack
 from usdev.apigateway import ApiGatewayStack
 from usdev.efs import EFSStack
+from usdev.s3 import S3Stack
 
 class StackSet:
 
@@ -94,3 +95,8 @@ class StackSet:
             construct_id    = f"{construct_prefix}--efs",
             security_groups = self.securityGroupStack.security_groups,
             subnets         = self.vpcStack.subnets,)
+        
+        self.s3Stack = S3Stack(
+            scope           = app,
+            env             = environment,
+            construct_id    = f"{construct_prefix}--s3",)
